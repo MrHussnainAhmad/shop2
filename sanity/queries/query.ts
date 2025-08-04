@@ -59,7 +59,9 @@ export const FEATURED_PRODUTS = defineQuery(`*[_type == "product" && featured ==
     slug
   },
   featured,
-  tags
+  customAttributes,
+  tags,
+  couponCode
 } | order(_createdAt desc)`)
 
 export const BRANDS = defineQuery(`*[_type == "brand"] {
@@ -70,3 +72,94 @@ export const BRANDS = defineQuery(`*[_type == "brand"] {
   logoUrl,
   description
 } | order(_createdAt desc)`)
+
+export const PRODUCT_BY_SLUG = defineQuery(`*[_type == "product" && slug.current == $slug][0] {
+  _id,
+  name,
+  slug,
+  description,
+  images,
+  originalPrice,
+  discount,
+  sku,
+  stock,
+  status,
+  variant,
+  category->{
+    _id,
+    name,
+    slug
+  },
+  brand->{
+    _id,
+    name,
+    slug
+  },
+  featured,
+  customAttributes,
+  tags,
+  couponCode
+}`);//
+
+export const ALL_PRODUCTS_DEBUG = defineQuery(`*[_type == "product"] {
+  _id,
+  name,
+  slug,
+  couponCode
+}`);
+
+export const ALL_PRODUCTS = defineQuery(`*[_type == "product"] {
+  _id,
+  name,
+  slug,
+  description,
+  images,
+  originalPrice,
+  discount,
+  sku,
+  stock,
+  status,
+  variant,
+  category->{
+    _id,
+    name,
+    slug
+  },
+  brand->{
+    _id,
+    name,
+    slug
+  },
+  featured,
+  customAttributes,
+  tags,
+  couponCode
+} | order(_createdAt desc)`);
+
+export const SEARCH_PRODUCTS = defineQuery(`*[_type == "product" && (name match $searchTerm || slug.current match $searchTerm)] {
+  _id,
+  name,
+  slug,
+  description,
+  images,
+  originalPrice,
+  discount,
+  sku,
+  stock,
+  status,
+  variant,
+  category->{
+    _id,
+    name,
+    slug
+  },
+  brand->{
+    _id,
+    name,
+    slug
+  },
+  featured,
+  customAttributes,
+  tags,
+  couponCode
+} | order(_createdAt desc)[0...10]`)

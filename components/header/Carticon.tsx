@@ -10,7 +10,7 @@ const Carticon = () => {
   return (
     <Link
       href="/cart"
-      className="flex items-center gap-2 justify-end group p-1 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded"
+      className="flex items-center gap-2 justify-end group p-1 focus:outline-none rounded"
       aria-label={`Shopping cart with ${cartCount} items`}
     >
       <span className="relative">

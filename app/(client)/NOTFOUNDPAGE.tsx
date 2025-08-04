@@ -1,7 +1,7 @@
 "use client";
 
 import Container from "@/components/common/Container";
-import { ShoppingBag, Home, Search, ArrowLeft } from "lucide-react";
+import { ShoppingBag, Home, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from 'react';
 
@@ -25,7 +25,7 @@ const NotFoundPage = () => {
               Oops! Page Not Found
             </h2>
             <p className="text-lg text-gray-600 max-w-md mx-auto leading-relaxed">
-              The page you're looking for seems to have gone shopping! 
+              The page you&apos;re looking for seems to have gone shopping! 
               It might have been moved, deleted, or you entered the wrong URL.
             </p>
           </div>

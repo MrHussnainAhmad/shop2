@@ -151,6 +151,92 @@ export const productType = defineType({
       initialValue: false,
     }),
     defineField({
+      name: "customAttributes",
+      title: "Custom Attributes",
+      type: "array",
+      description: "Add any custom product details with your own field names and values",
+      of: [
+        {
+          type: "object",
+          name: "customAttribute",
+          title: "Custom Attribute",
+          fields: [
+            {
+              name: "name",
+              title: "Attribute Name",
+              type: "string",
+              description: "e.g., GPS, Dual Sim, Bluetooth Version, etc.",
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: "value",
+              title: "Attribute Value",
+              type: "string",
+              description: "e.g., Yes, No, 5.0, 128GB, etc.",
+              validation: (Rule) => Rule.required(),
+            },
+          ],
+          preview: {
+            select: {
+              name: "name",
+              value: "value",
+            },
+            prepare(selection) {
+              const { name, value } = selection;
+              return {
+                title: `${name}: ${value}`,
+              };
+            },
+          },
+        },
+      ],
+      options: {
+        sortable: true,
+      },
+    }),
+    defineField({
+      name: "couponCode",
+      title: "Coupon Code",
+      type: "object",
+      description: "Optional coupon code for additional discount on this product",
+      fields: [
+        {
+          name: "code",
+          title: "Coupon Code",
+          type: "string",
+          description: "e.g., SPRING45, WELCOME20, etc.",
+          validation: (Rule) => Rule.custom((code) => {
+            if (!code) return true; // Allow empty
+            return /^[A-Z0-9]{3,20}$/.test(code) || "Coupon code must be 3-20 characters, uppercase letters and numbers only";
+          }),
+        },
+        {
+          name: "discount",
+          title: "Discount Percentage",
+          type: "number",
+          description: "Additional discount percentage for this coupon (0-100)",
+          validation: (Rule) => Rule.min(0).max(100),
+        },
+      ],
+      preview: {
+        select: {
+          code: "code",
+          discount: "discount",
+        },
+        prepare(selection) {
+          const { code, discount } = selection;
+          if (!code) return { title: "No coupon code" };
+          return {
+            title: `${code} - ${discount}% OFF`,
+          };
+        },
+      },
+      options: {
+        collapsible: true,
+        collapsed: true,
+      },
+    }),
+    defineField({
       name: "tags",
       title: "Tags",
       type: "array",

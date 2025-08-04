@@ -10,6 +10,7 @@ import { urlFor } from "@/sanity/lib/image";
 import { getBanner } from "@/sanity/queries";
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Comparison from "./Comparison";
 import MiniBanner from "./MiniBanner";
 
@@ -26,8 +27,12 @@ const Banner = async () => {
           </div>
         </div>
         <div className="hidden lg:flex flex-col gap-5 h-full">
-          <Comparison />
-          <MiniBanner />
+          <div className="flex-1">
+            <Comparison />
+          </div>
+          <div className="flex-1">
+            <MiniBanner />
+          </div>
         </div>
       </Container>
     );
@@ -38,14 +43,16 @@ const Banner = async () => {
       <div className="w-full lg:col-span-3">
         <Carousel className="relative w-full rounded-md overflow-hidden">
           <CarouselContent>
-            {banner.map((item, index) => (
-              <CarouselItem key={index}>
-                <div className="relative w-full aspect-[16/9] md:aspect-[21/9]">
+            {banner.map((item, index) => {
+              const BannerContent = (
+                <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group">
                   {item?.image ? (
                     <Image
                       src={urlFor(item.image).url()}
                       alt={item?.name || `Banner ${index + 1}`}
-                      className="object-cover w-full h-full"
+                      className={`object-cover w-full h-full transition-transform duration-300 ${
+                        item?.link ? 'group-hover:scale-105' : ''
+                      }`}
                       fill
                       priority={index === 0}
                     />
@@ -53,7 +60,9 @@ const Banner = async () => {
                     <Image
                       src={item.imageUrl}
                       alt={item?.name || `Banner ${index + 1}`}
-                      className="object-cover w-full h-full"
+                      className={`object-cover w-full h-full transition-transform duration-300 ${
+                        item?.link ? 'group-hover:scale-105' : ''
+                      }`}
                       fill
                       priority={index === 0}
                     />
@@ -82,9 +91,29 @@ const Banner = async () => {
                       )}
                     </div>
                   )}
+                  {/* Link indicator */}
+                  {item?.link && (
+                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-              </CarouselItem>
-            ))}
+              );
+
+              return (
+                <CarouselItem key={index}>
+                  {item?.link ? (
+                    <Link href={item.link} className="block cursor-pointer">
+                      {BannerContent}
+                    </Link>
+                  ) : (
+                    BannerContent
+                  )}
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
             <CarouselPrevious />
@@ -93,8 +122,12 @@ const Banner = async () => {
         </Carousel>
       </div>
       <div className="hidden lg:flex flex-col gap-5 h-full">
-        <Comparison />
-        <MiniBanner />
+        <div className="flex-1">
+          <Comparison />
+        </div>
+        <div className="flex-1">
+          <MiniBanner />
+        </div>
       </div>
     </Container>
   );

@@ -1,5 +1,5 @@
 import { sanityFetch } from "../lib/live";
-import { BANNER_QUERY, MINI_BANNER_QUERY,FEATURED_PRODUTS , BRANDS } from "./query";
+import { BANNER_QUERY, MINI_BANNER_QUERY,FEATURED_PRODUTS , BRANDS, PRODUCT_BY_SLUG, SEARCH_PRODUCTS, ALL_PRODUCTS_DEBUG, ALL_PRODUCTS } from "./query";
 
 export const getBanner = async () => {
   try {
@@ -60,3 +60,43 @@ export const getAllBrands = async () =>{
     return null;
   }
 }
+
+export const getProductBySlug = async (slug: string) => {
+  try {
+    const { data } = await sanityFetch({ query: PRODUCT_BY_SLUG, params: { slug } });
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
+    return null;
+  }
+};
+
+export const searchProducts = async (searchTerm: string) => {
+  try {
+    const { data } = await sanityFetch({ query: SEARCH_PRODUCTS, params: { searchTerm: `*${searchTerm}*` } });
+    return data ?? [];
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+};
+
+export const getAllProductsDebug = async () => {
+  try {
+    const { data } = await sanityFetch({ query: ALL_PRODUCTS_DEBUG });
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching all products for debug:", error);
+    return [];
+  }
+};
+
+export const getAllProducts = async () => {
+  try {
+    const { data } = await sanityFetch({ query: ALL_PRODUCTS });
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+    return [];
+  }
+};

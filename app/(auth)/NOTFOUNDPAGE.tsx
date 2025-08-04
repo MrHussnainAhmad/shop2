@@ -22,7 +22,7 @@ const AuthNotFoundPage = () => {
             Authentication Page Not Found
           </h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            The authentication page you're looking for doesn't exist. 
+            The authentication page you&apos;re looking for doesn&apos;t exist. 
             You might have an outdated link or the page has been moved.
           </p>
         </div>
