@@ -5,10 +5,11 @@ import useCartStore from '@/store'
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
 import { urlFor } from '@/sanity/lib/image'
+import { useAddresses } from '@/hooks/useAddresses'
 
 const CartClientPage = () => {
   const { user } = useUser()
-  const { 
+const { 
     items, 
     removeItem, 
     updateQuantity, 
@@ -17,15 +18,22 @@ const CartClientPage = () => {
     getTotalItems,
     applyCouponToItem,
     getItemPrice,
-    removeCouponFromItem
+    removeCouponFromItem,
+    appliedVoucher,
+    applyVoucher,
+    removeVoucher,
+    getAppliedCoupons
   } = useCartStore()
+  
+  const { getDefaultAddress } = useAddresses();
+  const defaultAddress = getDefaultAddress();
   
   const [couponCode, setCouponCode] = useState('')
   const [voucherCode, setVoucherCode] = useState('')
   const [selectedDelivery, setSelectedDelivery] = useState('home')
-  const [appliedDiscount, setAppliedDiscount] = useState(0)
-  const [appliedCoupons, setAppliedCoupons] = useState<{code: string, discount: number, productId: string, productName: string}[]>([])
-  const [appliedVoucher, setAppliedVoucher] = useState<{code: string, discount: number} | null>(null)
+  
+  // Get applied coupons from store instead of local state
+  const appliedCoupons = getAppliedCoupons()
 
   // Check if user is logged in
   if (!user) {
@@ -69,9 +77,19 @@ const CartClientPage = () => {
     }, 0);
   };
   
+  // Calculate subtotal with coupon discounts but without voucher
+  const calculateSubtotalWithCoupons = () => {
+    return items.reduce((total, item) => {
+      const price = getItemPrice(item);
+      return total + (price * item.quantity);
+    }, 0);
+  };
+  
   const subtotalWithoutCoupons = calculateSubtotalWithoutCoupons();
-  const total = getTotalPrice(); // This includes coupon discounts
-  const couponDiscount = subtotalWithoutCoupons - total;
+  const subtotalWithCoupons = calculateSubtotalWithCoupons();
+  const total = getTotalPrice(); // This includes coupon and voucher discounts
+  const couponDiscount = subtotalWithoutCoupons - subtotalWithCoupons;
+  const voucherDiscount = appliedVoucher ? (subtotalWithCoupons * appliedVoucher.discount / 100) : 0;
 
   const applyCoupon = () => {
     if (!couponCode) {
@@ -81,7 +99,6 @@ const CartClientPage = () => {
     
     let hasSuccess = false;
     let messages: string[] = [];
-    const newAppliedCoupons: {code: string, discount: number, productId: string, productName: string}[] = [];
     
     items.forEach(item => {
       const result = applyCouponToItem(item.product._id, couponCode);
@@ -89,48 +106,34 @@ const CartClientPage = () => {
       
       if (result.success) {
         hasSuccess = true;
-        newAppliedCoupons.push({
-          code: couponCode.toUpperCase(),
-          discount: result.discount || 0,
-          productId: item.product._id,
-          productName: item.product.name
-        });
       }
     });
     
     // Show consolidated message
     if (hasSuccess) {
       alert('Coupon applied successfully to applicable products!');
-      setAppliedCoupons(prev => [...prev, ...newAppliedCoupons]);
       setCouponCode(''); // Clear the input
     } else {
       alert(messages[0] || 'Invalid coupon code');
     }
   }
 
-  const applyVoucher = () => {
-    // Implementation for applying voucher - to be implemented later
+  const handleApplyVoucher = () => {
     if (!voucherCode) {
       alert('Please enter a voucher code.');
       return;
     }
     
-    // Mock voucher application for now
-    setAppliedVoucher({
-      code: voucherCode.toUpperCase(),
-      discount: 10 // Mock 10% discount
-    });
-    setVoucherCode('');
-    alert('Voucher applied successfully! (Mock 10% discount)');
+    const result = applyVoucher(voucherCode);
+    alert(result.message);
+    
+    if (result.success) {
+      setVoucherCode(''); // Clear the input
+    }
   };
   
   const removeCoupon = (productId: string, code: string) => {
     removeCouponFromItem(productId);
-    setAppliedCoupons(prev => prev.filter(coupon => !(coupon.productId === productId && coupon.code === code)));
-  };
-  
-  const removeVoucher = () => {
-    setAppliedVoucher(null);
   };
 
   return (
@@ -290,7 +293,7 @@ const CartClientPage = () => {
                         </div>
                         <div className="col-span-2">
                           <span className="font-semibold text-gray-900">${price.toFixed(2)}</span>
-                          {item.product.originalPrice && item.product.discount > 0 && (
+                          {item.product.originalPrice && item.product.discount && item.product.discount > 0 && (
                             <span className="text-xs text-gray-500 line-through block">
                               ${item.product.originalPrice.toFixed(2)}
                             </span>
@@ -377,7 +380,7 @@ const CartClientPage = () => {
                     className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
                   <button 
-                    onClick={applyVoucher}
+                    onClick={handleApplyVoucher}
                     className="px-4 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                   >
                     Apply Voucher
@@ -496,6 +499,12 @@ const CartClientPage = () => {
                     <span className="font-medium text-green-600">-${couponDiscount.toFixed(2)}</span>
                   </div>
                 )}
+                {voucherDiscount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Voucher Discount</span>
+                    <span className="font-medium text-blue-600">-${voucherDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-4">
                   <div className="flex justify-between">
                     <span className="text-lg font-semibold">Total</span>
@@ -504,22 +513,43 @@ const CartClientPage = () => {
                 </div>
               </div>
 
-              {/* Delivery Address */}
-              <div className="mb-6">
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Delivery Address
-                </h4>
-                <div>
+{/* Default Delivery Address */}
+              {defaultAddress ? (
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Delivery Address
+                  </h4>
+                  <div className="text-sm text-gray-600 space-y-1 mb-3">
+                    <p className="font-medium text-gray-900">{defaultAddress.name}</p>
+                    <p>{defaultAddress.streetAddress}</p>
+                    {defaultAddress.apartment && <p>{defaultAddress.apartment}</p>}
+                    <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.postalCode}</p>
+                    <p>{defaultAddress.country}</p>
+                    <p>{defaultAddress.phone}</p>
+                  </div>
                   <a 
                     href="/account/addresses" 
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
                   >
-                    Add Different Address
+                    Change Address
                   </a>
                 </div>
-              </div>
-
+              ) : (
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Delivery Address
+                  </h4>
+                  <a 
+                    href="/account/addresses" 
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
+                  >
+                    Add Address
+                  </a>
+                </div>
+              )}
+              
               {/* Checkout Button */}
               <button className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors font-medium">
                 Next Step

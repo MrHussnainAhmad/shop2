@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoBookmarks } from "react-icons/io5";
 import {
   FaClipboardList,
@@ -11,10 +11,11 @@ import { IoMdBookmarks } from "react-icons/io";
 import { PiCurrencyDollarSimpleFill } from "react-icons/pi";
 import { MdStars } from "react-icons/md";
 import { FaCirclePlus } from "react-icons/fa6";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAccount } from "@/contexts/AccountContext";
 
 const accountmenu = [
   {
@@ -47,33 +48,51 @@ const accountmenu = [
     icon: <PiCurrencyDollarSimpleFill />,
     href: "/account/transactions",
   },
-  {
-    title: " Tech Points",
-    icon: <MdStars />,
-    href: "/account/points",
-  },
-  {
-    title: "Quote",
-    icon: <FaCirclePlus />,
-    href: "/account/quotes",
-  },
-  {
-    title: "Add+",
-    icon: <FaCirclePlus />,
-    href: "/account/add",
-  },
 ];
 
 const AccountMenu = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const { isAccountMenuVisible, setAccountMenuVisible, currentSection, setCurrentSection, setHideMainMenu } = useAccount();
 
-  //   if (pathname === "/account/account") return null;
+  // Check if we're on the main account page or a specific section
+  const isMainAccountPage = pathname === "/account/account";
+  const isAccountSection = pathname.startsWith("/account/") && !isMainAccountPage;
+
+  useEffect(() => {
+    if (isAccountSection) {
+setAccountMenuVisible(true);
+    setHideMainMenu(true);
+      const section = pathname.split('/')[2];
+      setCurrentSection(section);
+    } else {
+setAccountMenuVisible(false);
+    setHideMainMenu(false);
+      setCurrentSection(null);
+    }
+  }, [pathname, setAccountMenuVisible, setCurrentSection, setHideMainMenu, isAccountSection]);
 
   const currentPage = accountmenu.find((item) => item.href === pathname);
 
+  // Show account menu only when on account sections (not main account page)
+  if (!isAccountSection) {
+    return null;
+  }
+
+  const handleMenuClick = (item: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(false);
+    
+    // Update URL and context
+    router.push(item.href);
+    setAccountMenuVisible(true);
+    const section = item.href.split('/')[2];
+    setCurrentSection(section);
+  };
+
   return (
-    <div className="border-b pb-2">
+    <div className="border-b pb-2 mb-4">
       {/* Mobile and Medium View*/}
       <div className="lg:hidden relative">
         {/* Custom Dropdown Button */}
@@ -101,12 +120,11 @@ const AccountMenu = () => {
         {isOpen && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
             {accountmenu.map((item, index) => (
-              <Link
+              <button
                 key={index}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => handleMenuClick(item, e)}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0",
+                  "w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 text-left",
                   item.href === pathname ? "bg-orange-50" : ""
                 )}
               >
@@ -122,7 +140,7 @@ const AccountMenu = () => {
                 )}>
                   {item.title}
                 </span>
-              </Link>
+              </button>
             ))}
           </div>
         )}
@@ -139,10 +157,10 @@ const AccountMenu = () => {
       {/* Large View */}
       <div className="hidden lg:flex lg:flex-wrap lg:items-center lg:gap-5">
         {accountmenu?.map((item, index) => (
-          <Link
+          <button
             key={index}
-            href={item?.href}
-            className="flex items-center gap-2 group"
+            onClick={(e) => handleMenuClick(item, e)}
+            className="flex items-center gap-2 group text-left"
           >
             <span
               className={cn(
@@ -165,7 +183,7 @@ const AccountMenu = () => {
               {" "}
               {item?.title}
             </span>
-          </Link>
+          </button>
         ))}
       </div>
     </div>

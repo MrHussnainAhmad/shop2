@@ -13,6 +13,7 @@ interface CartItem {
 
 interface StoreState {
   items: CartItem[];
+  appliedVoucher: { code: string; discount: number } | null;
   addItem: (product: Product) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -23,11 +24,15 @@ interface StoreState {
   applyCouponToItem: (productId: string, couponCode: string) => { success: boolean; message: string; discount?: number };
   removeCouponFromItem: (productId: string) => void;
   getItemPrice: (item: CartItem) => number;
+  applyVoucher: (voucherCode: string) => { success: boolean; message: string };
+  removeVoucher: () => void;
+  getAppliedCoupons: () => { code: string; discount: number; productId: string; productName: string }[];
 }
 
 const useCartStore = create<StoreState>()(  persist(
     (set, get) => ({
       items: [],
+      appliedVoucher: null,
       
       addItem: (product: Product) => {
         const items = get().items;
@@ -72,10 +77,18 @@ const useCartStore = create<StoreState>()(  persist(
       },
       
       getTotalPrice: () => {
-        return get().items.reduce((total, item) => {
+        const itemsTotal = get().items.reduce((total, item) => {
           const price = get().getItemPrice(item);
           return total + (price * item.quantity);
         }, 0);
+        
+        // Apply voucher discount to total if any
+        const voucher = get().appliedVoucher;
+        if (voucher) {
+          return itemsTotal - (itemsTotal * voucher.discount / 100);
+        }
+        
+        return itemsTotal;
       },
       
       getItemPrice: (item: CartItem) => {
@@ -156,6 +169,43 @@ const useCartStore = create<StoreState>()(  persist(
       getItemQuantity: (productId: string) => {
         const item = get().items.find(item => item.product._id === productId);
         return item ? item.quantity : 0;
+      },
+      
+      applyVoucher: (voucherCode: string) => {
+        // Mock voucher validation - in real app, this would validate against backend
+        const validVouchers = {
+          'SAVE10': 10,
+          'SAVE20': 20,
+          'WELCOME': 15
+        };
+        
+        const discount = validVouchers[voucherCode.toUpperCase() as keyof typeof validVouchers];
+        
+        if (!discount) {
+          return { success: false, message: 'Invalid voucher code' };
+        }
+        
+        if (get().appliedVoucher?.code === voucherCode.toUpperCase()) {
+          return { success: false, message: 'Voucher already applied' };
+        }
+        
+        set({ appliedVoucher: { code: voucherCode.toUpperCase(), discount } });
+        return { success: true, message: `Voucher applied! ${discount}% discount on total order` };
+      },
+      
+      removeVoucher: () => {
+        set({ appliedVoucher: null });
+      },
+      
+      getAppliedCoupons: () => {
+        return get().items
+          .filter(item => item.appliedCoupon)
+          .map(item => ({
+            code: item.appliedCoupon!.code,
+            discount: item.appliedCoupon!.discount,
+            productId: item.product._id,
+            productName: item.product.name || 'Unknown Product'
+          }));
       }
     }),
     { name: "cart-storage" }
