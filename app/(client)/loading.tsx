@@ -5,100 +5,79 @@ import { ShoppingBag, Package, Truck, CreditCard } from 'lucide-react';
 const Loading = () => {
   return (
     <div className="min-h-screen bg-custom-body flex items-center justify-center relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 left-10 w-8 h-8 bg-custom-navBar rounded-full animate-pulse"></div>
-        <div className="absolute top-20 right-20 w-6 h-6 bg-custom-sec1 rounded-full animate-pulse delay-300"></div>
-        <div className="absolute bottom-20 left-20 w-4 h-4 bg-custom-sec2 rounded-full animate-pulse delay-500"></div>
-        <div className="absolute bottom-10 right-10 w-10 h-10 bg-custom-sec3 rounded-full animate-pulse delay-700"></div>
+      {/* Background Shapes */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-custom-sec1/20 rounded-full animate-float mix-blend-multiply filter blur-xl opacity-70"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-custom-sec2/20 rounded-full animate-float-delay mix-blend-multiply filter blur-xl opacity-70"></div>
+        <div className="absolute top-1/2 right-1/3 w-24 h-24 bg-custom-sec3/20 rounded-full animate-float mix-blend-multiply filter blur-xl opacity-70"></div>
       </div>
 
       <div className="text-center relative z-10">
-        {/* Main Loading Container */}
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl border border-custom-sec3/20 max-w-md mx-auto">
+        {/* Main Loader */}
+        <div className="relative w-48 h-48">
+          {/* Rotating Border */}
+          <div className="absolute inset-0 border-4 border-custom-sec1/30 border-t-custom-navBar rounded-full animate-spin-slow"></div>
           
-          {/* Logo Area */}
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-custom-navBar to-custom-sec1 rounded-2xl mx-auto flex items-center justify-center mb-4 animate-bounce">
-              <ShoppingBag className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-custom-navBar mb-2">Shop</h1>
-            <p className="text-custom-navBar/70 text-sm">Loading your shopping experience...</p>
-          </div>
-
-          {/* Animated Icons */}
-          <div className="flex justify-center space-x-6 mb-8">
-            <div className="animate-pulse delay-100">
-              <div className="w-12 h-12 bg-custom-sec1/20 rounded-xl flex items-center justify-center">
-                <Package className="w-6 h-6 text-custom-navBar animate-bounce delay-200" />
-              </div>
-            </div>
-            <div className="animate-pulse delay-300">
-              <div className="w-12 h-12 bg-custom-sec2/20 rounded-xl flex items-center justify-center">
-                <Truck className="w-6 h-6 text-custom-navBar animate-bounce delay-400" />
-              </div>
-            </div>
-            <div className="animate-pulse delay-500">
-              <div className="w-12 h-12 bg-custom-sec3/20 rounded-xl flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-custom-navBar animate-bounce delay-600" />
-              </div>
+          {/* Main Logo */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-32 h-32 bg-white/80 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center">
+              <ShoppingBag className="w-16 h-16 text-custom-navBar" />
             </div>
           </div>
-
-          {/* Progress Bar */}
-          <div className="mb-6">
-            <div className="w-full bg-custom-sec4/30 rounded-full h-2 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-custom-navBar via-custom-sec1 to-custom-sec2 rounded-full animate-progress"></div>
+          
+          {/* Floating Icons */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-float">
+            <div className="w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center">
+              <Package className="w-6 h-6 text-custom-sec1" />
             </div>
           </div>
-
-          {/* Loading Dots */}
-          <div className="flex justify-center space-x-2 mb-4">
-            <div className="w-3 h-3 bg-custom-navBar rounded-full animate-bounce"></div>
-            <div className="w-3 h-3 bg-custom-navBar rounded-full animate-bounce delay-100"></div>
-            <div className="w-3 h-3 bg-custom-navBar rounded-full animate-bounce delay-200"></div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 animate-float-delay-2">
+            <div className="w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center">
+              <Truck className="w-6 h-6 text-custom-sec2" />
+            </div>
           </div>
-
-          {/* Loading Text */}
-          <div className="text-custom-navBar/80 text-sm animate-pulse">
-            Preparing your products...
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 animate-float-delay-4">
+            <div className="w-12 h-12 bg-white/70 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-custom-sec3" />
+            </div>
           </div>
         </div>
 
-        {/* Floating Elements */}
-        <div className="absolute -top-4 -left-4 w-8 h-8 bg-custom-sec1/20 rounded-full animate-ping"></div>
-        <div className="absolute -bottom-4 -right-4 w-6 h-6 bg-custom-sec2/20 rounded-full animate-ping delay-300"></div>
-        <div className="absolute top-1/2 -left-8 w-4 h-4 bg-custom-sec3/20 rounded-full animate-ping delay-500"></div>
-        <div className="absolute top-1/2 -right-8 w-4 h-4 bg-custom-sec4/20 rounded-full animate-ping delay-700"></div>
+        {/* Loading Text */}
+        <div className="mt-8 text-custom-navBar/80 text-lg font-medium animate-pulse">
+          Loading your shopping experience...
+        </div>
       </div>
 
-      {/* Custom Animations */}
       <style jsx>{`
-        @keyframes progress {
-          0% { width: 0%; }
-          50% { width: 70%; }
-          100% { width: 100%; }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
-        .animate-progress {
-          animation: progress 2s ease-in-out infinite;
+        .animate-spin-slow {
+          animation: spin-slow 2s linear infinite;
         }
-        
+
         @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(15deg); }
         }
         .animate-float {
-          animation: float 3s ease-in-out infinite;
+          animation: float 4s ease-in-out infinite;
         }
-        
-        @keyframes shimmer {
-          0% { background-position: -200px 0; }
-          100% { background-position: calc(200px + 100%) 0; }
+
+        @keyframes float-delay {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(20px) rotate(-15deg); }
         }
-        .animate-shimmer {
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-          background-size: 200px 100%;
-          animation: shimmer 2s infinite;
+        .animate-float-delay {
+          animation: float-delay 5s ease-in-out infinite delay-1s;
+        }
+        .animate-float-delay-2 {
+          animation: float 5s ease-in-out infinite delay-2s;
+        }
+        .animate-float-delay-4 {
+          animation: float 5s ease-in-out infinite delay-4s;
         }
       `}</style>
     </div>
