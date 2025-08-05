@@ -2,10 +2,16 @@
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { useCart } from "../../contexts/CartContext";
+import useCartStore from '@/store';
 
 const Carticon = () => {
-  const { cartCount } = useCart();
+  const [mounted, setMounted] = React.useState(false);
+  const { getTotalItems } = useCartStore();
+  const cartCount = mounted ? getTotalItems() : 0;
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   
   return (
     <Link
@@ -20,11 +26,11 @@ const Carticon = () => {
         />
         {cartCount > 0 && (
           <span 
-            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] text-[10px] font-bold bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-pulse"
+            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] text-[10px] font-bold bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full flex items-center justify-center shadow-lg"
             aria-label={`${cartCount} items`}
             style={{
               background: cartCount > 0 ? 'linear-gradient(135deg, #ef4444 0%, #ec4899 100%)' : '',
-              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4), 0 0 0 2px white'
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
             }}
           >
             {cartCount > 99 ? '99+' : cartCount}
@@ -33,7 +39,7 @@ const Carticon = () => {
       </span>
       <div className="hidden lg:flex flex-col">
         <h4 className="text-base font-bold text-white group-hover:text-orange-500 hoverEffect">
-          Cart {cartCount > 0 && `(${cartCount})`}
+          Cart
         </h4>
         <p className="text-xs whitespace-nowrap">View Cart</p>
       </div>

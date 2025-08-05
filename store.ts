@@ -77,29 +77,49 @@ const useCartStore = create<StoreState>()(  persist(
       },
       
       getTotalPrice: () => {
-        const itemsTotal = get().items.reduce((total, item) => {
-          const price = get().getItemPrice(item);
-          return total + (price * item.quantity);
-        }, 0);
+        const items = get().items;
         
-        // Apply voucher discount to total if any
+        // Calculate total for deal products (no voucher discount applied)
+        const dealItemsTotal = items
+          .filter(item => item.product.isOnDeal)
+          .reduce((total, item) => {
+            const price = get().getItemPrice(item);
+            return total + (price * item.quantity);
+          }, 0);
+        
+        // Calculate total for regular products
+        const regularItemsTotal = items
+          .filter(item => !item.product.isOnDeal)
+          .reduce((total, item) => {
+            const price = get().getItemPrice(item);
+            return total + (price * item.quantity);
+          }, 0);
+        
+        // Apply voucher discount only to regular products
         const voucher = get().appliedVoucher;
-        if (voucher) {
-          return itemsTotal - (itemsTotal * voucher.discount / 100);
+        let finalRegularTotal = regularItemsTotal;
+        if (voucher && regularItemsTotal > 0) {
+          finalRegularTotal = regularItemsTotal - (regularItemsTotal * voucher.discount / 100);
         }
         
-        return itemsTotal;
+        return dealItemsTotal + finalRegularTotal;
       },
       
       getItemPrice: (item: CartItem) => {
         const originalPrice = item.product.originalPrice || 0;
-        const productDiscount = item.product.discount || 0;
         
-        // Apply product discount first
+        // Check if product is on deal
+        if (item.product.isOnDeal && item.product.dealPercentage) {
+          // For deal products, only apply deal discount
+          return originalPrice - (originalPrice * item.product.dealPercentage / 100);
+        }
+        
+        // For regular products, apply regular discount first
+        const productDiscount = item.product.discount || 0;
         let price = originalPrice - (originalPrice * productDiscount / 100);
         
-        // Apply coupon discount if any
-        if (item.appliedCoupon) {
+        // Apply coupon discount if any and product is not on deal
+        if (item.appliedCoupon && !item.product.isOnDeal) {
           price = price - (price * item.appliedCoupon.discount / 100);
         }
         
@@ -112,6 +132,11 @@ const useCartStore = create<StoreState>()(  persist(
         
         if (!item) {
           return { success: false, message: "Product not found in cart" };
+        }
+        
+        // Check if product is on deal - deal products cannot use coupons
+        if (item.product.isOnDeal) {
+          return { success: false, message: "Deal products cannot be combined with coupon codes" };
         }
         
         // Check if product has a coupon code
@@ -172,6 +197,14 @@ const useCartStore = create<StoreState>()(  persist(
       },
       
       applyVoucher: (voucherCode: string) => {
+        const items = get().items;
+        
+        // Check if cart has only deal products
+        const regularItems = items.filter(item => !item.product.isOnDeal);
+        if (regularItems.length === 0) {
+          return { success: false, message: 'Voucher codes cannot be applied to deal products only' };
+        }
+        
         // Mock voucher validation - in real app, this would validate against backend
         const validVouchers = {
           'SAVE10': 10,
@@ -190,7 +223,7 @@ const useCartStore = create<StoreState>()(  persist(
         }
         
         set({ appliedVoucher: { code: voucherCode.toUpperCase(), discount } });
-        return { success: true, message: `Voucher applied! ${discount}% discount on total order` };
+        return { success: true, message: `Voucher applied! ${discount}% discount on eligible items (excludes deal products)` };
       },
       
       removeVoucher: () => {

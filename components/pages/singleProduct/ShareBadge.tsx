@@ -5,8 +5,11 @@ import React from "react";
 import { FaPinterest, FaFacebook, FaTwitter } from "react-icons/fa";
 import { MdAddToPhotos } from "react-icons/md";
 import { RiMessengerFill, RiWhatsappFill } from "react-icons/ri";
+import { useAlertModal } from "@/components/ui/alert-modal";
 
 const ShareBadge = ({ product }: { product?: Product }) => {
+  const modal = useAlertModal();
+  
   // Debug logging
   React.useEffect(() => {
     console.log('ShareBadge product data:', product);
@@ -70,7 +73,7 @@ const ShareBadge = ({ product }: { product?: Product }) => {
     
     if (!productId) {
       console.error('Product data:', product);
-      alert("Cannot identify product for comparison. Please try again.");
+modal.alert("Cannot identify product for comparison. Please try again.");
       return;
     }
     

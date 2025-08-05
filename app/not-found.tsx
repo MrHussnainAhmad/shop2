@@ -73,7 +73,7 @@ export default function NotFound() {
           <div className="mt-8 text-sm text-gray-500">
             <p>If you believe this is an error, please contact our support team.</p>
             <p className="mt-2">
-              <Link href="/contact" className="text-orange-500 hover:text-orange-600 underline">
+              <Link href="/contactus" className="text-orange-500 hover:text-orange-600 underline">
                 Contact Support
               </Link>
             </p>

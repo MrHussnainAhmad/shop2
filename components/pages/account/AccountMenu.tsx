@@ -34,9 +34,9 @@ const accountmenu = [
     href: "/account/edit",
   },
   {
-    title: "Adresses",
+    title: "Addresses",
     icon: <IoMdBookmarks />,
-    href: "/account/adresses",
+    href: "/account/addresses",
   },
   {
     title: "WishList",
@@ -44,7 +44,7 @@ const accountmenu = [
     href: "/account/wishlist",
   },
   {
-    title: "Your Transection",
+    title: "Your Transactions",
     icon: <PiCurrencyDollarSimpleFill />,
     href: "/account/transactions",
   },

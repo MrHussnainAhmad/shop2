@@ -407,7 +407,7 @@ export type CATEGORIES_QUERYResult = Array<{
   description: string | null;
 }>;
 // Variable: FEATURED_PRODUTS
-// Query: *[_type == "product" && featured == true] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  tags} | order(_createdAt desc)
+// Query: *[_type == "product" && featured == true] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  customAttributes,  tags,  couponCode,  isOnDeal,  dealPercentage} | order(_createdAt desc)
 export type FEATURED_PRODUTSResult = Array<{
   _id: string;
   name: string | null;
@@ -448,7 +448,16 @@ export type FEATURED_PRODUTSResult = Array<{
     slug: Slug | null;
   } | null;
   featured: boolean | null;
+  customAttributes: Array<{
+    name?: string;
+    value?: string;
+    _type: "customAttribute";
+    _key: string;
+  }> | null;
   tags: Array<string> | null;
+  couponCode: null;
+  isOnDeal: null;
+  dealPercentage: null;
 }>;
 // Variable: BRANDS
 // Query: *[_type == "brand"] {  _id,  name,  slug,  logo,  logoUrl,  description} | order(_createdAt desc)
@@ -472,7 +481,7 @@ export type BRANDSResult = Array<{
   description: string | null;
 }>;
 // Variable: PRODUCT_BY_SLUG
-// Query: *[_type == "product" && slug.current == $slug][0] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  tags}
+// Query: *[_type == "product" && slug.current == $slug][0] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  customAttributes,  tags,  couponCode,  isOnDeal,  dealPercentage}
 export type PRODUCT_BY_SLUGResult = {
   _id: string;
   name: string | null;
@@ -513,17 +522,83 @@ export type PRODUCT_BY_SLUGResult = {
     slug: Slug | null;
   } | null;
   featured: boolean | null;
+  customAttributes: Array<{
+    name?: string;
+    value?: string;
+    _type: "customAttribute";
+    _key: string;
+  }> | null;
   tags: Array<string> | null;
+  couponCode: null;
+  isOnDeal: null;
+  dealPercentage: null;
 } | null;
 // Variable: ALL_PRODUCTS_DEBUG
-// Query: *[_type == "product"] {  _id,  name,  slug}
+// Query: *[_type == "product"] {  _id,  name,  slug,  couponCode}
 export type ALL_PRODUCTS_DEBUGResult = Array<{
   _id: string;
   name: string | null;
   slug: Slug | null;
+  couponCode: null;
 }>;
+// Variable: ALL_PRODUCTS
+// Query: *[_type == "product"] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  customAttributes,  tags,  couponCode,  isOnDeal,  dealPercentage} | order(_createdAt desc)
+export type ALL_PRODUCTSResult = Array<{
+  _id: string;
+  name: string | null;
+  slug: Slug | null;
+  description: string | null;
+  images: Array<{
+    asset?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+    };
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+    _key: string;
+  } | {
+    url?: string;
+    alt?: string;
+    _type: "imageUrl";
+    _key: string;
+  }> | null;
+  originalPrice: number | null;
+  discount: number | null;
+  sku: string | null;
+  stock: number | null;
+  status: "Ending" | "Hot" | "Last Piece" | "New" | "Out of Stock" | "Sale" | null;
+  variant: string | null;
+  category: {
+    _id: string;
+    name: string | null;
+    slug: Slug | null;
+  } | null;
+  brand: {
+    _id: string;
+    name: string | null;
+    slug: Slug | null;
+  } | null;
+  featured: boolean | null;
+  customAttributes: Array<{
+    name?: string;
+    value?: string;
+    _type: "customAttribute";
+    _key: string;
+  }> | null;
+  tags: Array<string> | null;
+  couponCode: null;
+  isOnDeal: null;
+  dealPercentage: null;
+}>;
+// Variable: DEAL_PRODUCTS
+// Query: *[_type == "product" && isOnDeal == true] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  customAttributes,  tags,  couponCode,  isOnDeal,  dealPercentage} | order(_createdAt desc)
+export type DEAL_PRODUCTSResult = Array<never>;
 // Variable: SEARCH_PRODUCTS
-// Query: *[_type == "product" && (name match $searchTerm || slug.current match $searchTerm)] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  tags} | order(_createdAt desc)[0...10]
+// Query: *[_type == "product" && (name match $searchTerm || slug.current match $searchTerm)] {  _id,  name,  slug,  description,  images,  originalPrice,  discount,  sku,  stock,  status,  variant,  category->{    _id,    name,    slug  },  brand->{    _id,    name,    slug  },  featured,  customAttributes,  tags,  couponCode,  isOnDeal,  dealPercentage} | order(_createdAt desc)[0...10]
 export type SEARCH_PRODUCTSResult = Array<{
   _id: string;
   name: string | null;
@@ -564,7 +639,16 @@ export type SEARCH_PRODUCTSResult = Array<{
     slug: Slug | null;
   } | null;
   featured: boolean | null;
+  customAttributes: Array<{
+    name?: string;
+    value?: string;
+    _type: "customAttribute";
+    _key: string;
+  }> | null;
   tags: Array<string> | null;
+  couponCode: null;
+  isOnDeal: null;
+  dealPercentage: null;
 }>;
 
 // Query TypeMap
@@ -574,10 +658,12 @@ declare module "@sanity/client" {
     "*[_type == \"banner\" && (isMiniBanner != true)] {\n  _id,\n  name,\n  description,\n  link,\n  slug,\n  badge,\n  discountAmount,\n  image,\n  imageUrl,\n  isMiniBanner\n} | order(_createdAt desc)": BANNER_QUERYResult;
     "*[_type == \"banner\" && isMiniBanner == true] {\n  _id,\n  name,\n  description,\n  link,\n  slug,\n  badge,\n  discountAmount,\n  image,\n  imageUrl,\n  isMiniBanner\n} | order(_createdAt desc)": MINI_BANNER_QUERYResult;
     "*[_type == \"category\"] {\n  _id,\n  name,\n  slug,\n  image,\n  imageUrl,\n  description\n} | order(_createdAt desc)": CATEGORIES_QUERYResult;
-    "*[_type == \"product\" && featured == true] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  tags\n} | order(_createdAt desc)": FEATURED_PRODUTSResult;
+    "*[_type == \"product\" && featured == true] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  customAttributes,\n  tags,\n  couponCode,\n  isOnDeal,\n  dealPercentage\n} | order(_createdAt desc)": FEATURED_PRODUTSResult;
     "*[_type == \"brand\"] {\n  _id,\n  name,\n  slug,\n  logo,\n  logoUrl,\n  description\n} | order(_createdAt desc)": BRANDSResult;
-    "*[_type == \"product\" && slug.current == $slug][0] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  tags\n}": PRODUCT_BY_SLUGResult;
-    "*[_type == \"product\"] {\n  _id,\n  name,\n  slug\n}": ALL_PRODUCTS_DEBUGResult;
-    "*[_type == \"product\" && (name match $searchTerm || slug.current match $searchTerm)] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  tags\n} | order(_createdAt desc)[0...10]": SEARCH_PRODUCTSResult;
+    "*[_type == \"product\" && slug.current == $slug][0] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  customAttributes,\n  tags,\n  couponCode,\n  isOnDeal,\n  dealPercentage\n}": PRODUCT_BY_SLUGResult;
+    "*[_type == \"product\"] {\n  _id,\n  name,\n  slug,\n  couponCode\n}": ALL_PRODUCTS_DEBUGResult;
+    "*[_type == \"product\"] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  customAttributes,\n  tags,\n  couponCode,\n  isOnDeal,\n  dealPercentage\n} | order(_createdAt desc)": ALL_PRODUCTSResult;
+    "*[_type == \"product\" && isOnDeal == true] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  customAttributes,\n  tags,\n  couponCode,\n  isOnDeal,\n  dealPercentage\n} | order(_createdAt desc)": DEAL_PRODUCTSResult;
+    "*[_type == \"product\" && (name match $searchTerm || slug.current match $searchTerm)] {\n  _id,\n  name,\n  slug,\n  description,\n  images,\n  originalPrice,\n  discount,\n  sku,\n  stock,\n  status,\n  variant,\n  category->{\n    _id,\n    name,\n    slug\n  },\n  brand->{\n    _id,\n    name,\n    slug\n  },\n  featured,\n  customAttributes,\n  tags,\n  couponCode,\n  isOnDeal,\n  dealPercentage\n} | order(_createdAt desc)[0...10]": SEARCH_PRODUCTSResult;
   }
 }

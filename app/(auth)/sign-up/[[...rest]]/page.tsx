@@ -27,8 +27,8 @@ export default function SignUpPage() {
           </div>
           <div className="p-6">
             <SignUp
-              path="/sign-in"
-              signInUrl="/sign-up?redirect_url=/account/account"
+              path="/sign-up"
+              signInUrl="/sign-in?redirect_url=/account/account"
             />
           </div>
         </div>

@@ -10,10 +10,10 @@ interface BreadcrumbItem {
 }
 
 interface DynamicBreadcrumbProps {
-  items: BreadcrumbItem[];
+  items?: BreadcrumbItem[];
 }
 
-const DynamicBreadcrumb: React.FC<DynamicBreadcrumbProps> = ({ items }) => {
+const DynamicBreadcrumb: React.FC<DynamicBreadcrumbProps> = ({ items = [] }) => {
   return (
     <nav className="flex items-center space-x-1 text-sm text-gray-600 mb-6">
       <Link 

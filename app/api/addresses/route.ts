@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { client } from '@/sanity/lib/client';
 import { createClient } from '@sanity/client';
 
-// Log environment variables (without exposing the token)
-console.log('Sanity config:', {
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-  hasToken: !!process.env.SANITY_TOKEN,
-  tokenLength: process.env.SANITY_TOKEN?.length || 0
-});
-
-const sanityClient = createClient({
+const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
   useCdn: false,
@@ -39,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     console.log('Fetching addresses for email:', email);
     const query = `*[_type == "address" && email == "${email}"] | order(_createdAt desc)`;
-    const addresses = await sanityClient.fetch(query);
+    const addresses = await client.fetch(query);
     console.log('Found addresses:', addresses.length);
 
     return NextResponse.json(addresses);
@@ -64,17 +57,17 @@ export async function POST(request: NextRequest) {
     
     // If this is set as default, update other addresses first
     if (body.isDefault) {
-      const otherAddresses = await sanityClient.fetch(
+      const otherAddresses = await writeClient.fetch(
         `*[_type == "address" && email == "${body.email}"]`
       );
       
       for (const addr of otherAddresses) {
-        await sanityClient.patch(addr._id).set({ isDefault: false }).commit();
+        await writeClient.patch(addr._id).set({ isDefault: false }).commit();
       }
     }
 
     console.log('Creating address with data:', body);
-    const result = await sanityClient.create({
+    const result = await writeClient.create({
       _type: 'address',
       ...body,
     });
@@ -109,16 +102,16 @@ export async function PUT(request: NextRequest) {
 
     // If this is set as default, update other addresses first
     if (updateData.isDefault) {
-      const otherAddresses = await sanityClient.fetch(
+      const otherAddresses = await writeClient.fetch(
         `*[_type == "address" && email == "${updateData.email}" && _id != "${_id}"]`
       );
       
       for (const addr of otherAddresses) {
-        await sanityClient.patch(addr._id).set({ isDefault: false }).commit();
+        await writeClient.patch(addr._id).set({ isDefault: false }).commit();
       }
     }
 
-    const result = await sanityClient.patch(_id).set(updateData).commit();
+    const result = await writeClient.patch(_id).set(updateData).commit();
 
     return NextResponse.json(result);
   } catch (error) {
@@ -143,7 +136,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Address ID required' }, { status: 400 });
     }
 
-    await sanityClient.delete(addressId);
+    await writeClient.delete(addressId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

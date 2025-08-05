@@ -6,6 +6,7 @@ import { Heart, Star, Truck, Shield, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AddToCart from "@/components/common/AddToCart";
 import useCartStore from "@/store";
+import useWishlistStore from "@/store/wishlistStore";
 import toast from "react-hot-toast";
 
 interface ProductDetailsProps {
@@ -13,19 +14,39 @@ interface ProductDetailsProps {
 }
 
 const ProductDetails = ({ product }: ProductDetailsProps) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCartStore();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const isWishlisted = mounted ? isInWishlist(product._id) : false;
 
-  // Calculate final price after discount
+  // Calculate final price considering deal vs regular discount
   const originalPrice = product?.originalPrice || 0;
-  const discount = product?.discount || 0;
-  const finalPrice = originalPrice - (originalPrice * discount / 100);
+  const dealPercentage = product?.dealPercentage || 0;
+  const regularDiscount = product?.discount || 0;
+  
+  // Use deal discount if product is on deal, otherwise use regular discount
+  const isOnDeal = product?.isOnDeal && dealPercentage > 0;
+  const effectiveDiscount = isOnDeal ? dealPercentage : regularDiscount;
+  const finalPrice = originalPrice - (originalPrice * effectiveDiscount / 100);
 
   const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    // TODO: Implement wishlist functionality
-    console.log("Wishlist toggled:", !isWishlisted);
+    if (isWishlisted) {
+      removeFromWishlist(product._id);
+      toast.success(`${product?.name?.substring(0, 15)}... removed from wishlist!`, {
+        duration: 2000,
+      });
+    } else {
+      addToWishlist(product);
+      toast.success(`${product?.name?.substring(0, 15)}... added to wishlist!`, {
+        duration: 2000,
+      });
+    }
   };
 
   const isOutOfStock = product?.stock === 0;
@@ -68,19 +89,36 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
         </div>
       </div>
 
+      {/* Deal Alert for Deal Products */}
+      {isOnDeal && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-red-600 font-bold text-lg">🔥 SPECIAL DEAL</span>
+            <Badge className="bg-red-600 text-white">
+              {dealPercentage}% OFF
+            </Badge>
+          </div>
+          <p className="text-red-800 text-sm font-medium">
+            ⚠️ This product is on a special deal. Coupon codes and vouchers cannot be applied to deal products.
+          </p>
+        </div>
+      )}
+
       {/* Price */}
       <div className="space-y-2">
         <div className="flex items-center gap-4">
-          <span className="text-3xl font-bold text-custom-navBar">
+          <span className={`text-3xl font-bold ${
+            isOnDeal ? 'text-red-600' : 'text-custom-navBar'
+          }`}>
             ${finalPrice.toFixed(2)}
           </span>
-          {discount > 0 && (
+          {effectiveDiscount > 0 && (
             <>
               <span className="text-xl text-gray-500 line-through">
                 ${originalPrice.toFixed(2)}
               </span>
-              <Badge variant="destructive" className="bg-red-500">
-                -{discount}%
+              <Badge variant="destructive" className={isOnDeal ? "bg-red-600" : "bg-red-500"}>
+                -{effectiveDiscount}%{isOnDeal ? ' DEAL' : ''}
               </Badge>
             </>
           )}

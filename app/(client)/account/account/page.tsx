@@ -32,9 +32,9 @@ const accountmenu = [
     href: "/account/edit",
   },
   {
-    title: "Adresses",
+    title: "Addresses",
     icon: <IoMdBookmarks />,
-    href: "/account/adresses",
+    href: "/account/addresses",
   },
   {
     title: "WishList",

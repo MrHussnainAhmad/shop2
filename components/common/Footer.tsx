@@ -1,13 +1,46 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import FooterTop from "./FooterTop";
 import Container from "./Container";
 import Link from "next/link";
 import { Youtube, Github, Linkedin, Facebook, Slack } from "lucide-react";
 import Logo from "./Logo";
+import { client } from "@/sanity/lib/client";
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: {
+    current: string;
+  };
+  productCount?: number;
+}
 
 const date = new Date();
 
 const Footer = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await client.fetch(`*[_type == "category"] | order(name asc)[0...6]{
+          ...,
+          "productCount": count(*[_type == "product" && references(^._id)])
+        }`);
+        setCategories(data || []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="bg-white text-gray-800">
       <Container>
@@ -60,7 +93,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/about"
+                  href="/aboutus"
                   className="text-gray-600 hover:text-red-500 transition-colors"
                 >
                   About us
@@ -68,7 +101,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="/contactus"
                   className="text-gray-600 hover:text-red-500 transition-colors"
                 >
                   Contact us
@@ -112,62 +145,22 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-gray-900 mb-4">Categories</h3>
             <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/shop/mobiles"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Mobiles
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/appliances"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Appliances
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/smartphones"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Smartphones
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/air-conditioners"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Air Conditioners
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/washing-machine"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Washing Machine
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/kitchen-appliances"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Kitchen Appliances
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop/gadget-accessories"
-                  className="text-gray-600 hover:text-red-500 transition-colors"
-                >
-                  Gadget Accessories
-                </Link>
-              </li>
+              {categories && categories.length > 0 ? (
+                categories.map((category: Category) => (
+                  <li key={category._id}>
+                    <Link
+                      href={`/shop/${category.slug.current}`}
+                      className="text-gray-600 hover:text-red-500 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <span className="text-gray-500">No categories available</span>
+                </li>
+              )}
             </ul>
           </div>
 

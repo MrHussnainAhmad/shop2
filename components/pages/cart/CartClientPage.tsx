@@ -6,9 +6,11 @@ import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
 import { urlFor } from '@/sanity/lib/image'
 import { useAddresses } from '@/hooks/useAddresses'
+import { useAlertModal } from '@/components/ui/alert-modal'
 
 const CartClientPage = () => {
   const { user } = useUser()
+  const modal = useAlertModal()
 const { 
     items, 
     removeItem, 
@@ -93,14 +95,18 @@ const {
 
   const applyCoupon = () => {
     if (!couponCode) {
-      alert('Please enter a coupon code.');
+modal.alert('Please enter a coupon code.')
       return;
     }
     
     let hasSuccess = false;
     let messages: string[] = [];
+    let dealProductsCount = 0;
     
     items.forEach(item => {
+      if (item.product.isOnDeal) {
+        dealProductsCount++;
+      }
       const result = applyCouponToItem(item.product._id, couponCode);
       messages.push(result.message);
       
@@ -111,21 +117,30 @@ const {
     
     // Show consolidated message
     if (hasSuccess) {
-      alert('Coupon applied successfully to applicable products!');
+      let successMessage = 'Coupon applied successfully to applicable products!';
+      if (dealProductsCount > 0) {
+        successMessage += ` Note: ${dealProductsCount} deal product(s) in your cart cannot use coupon codes.`;
+      }
+modal.alert(successMessage);
       setCouponCode(''); // Clear the input
     } else {
-      alert(messages[0] || 'Invalid coupon code');
+      // Check if all products are deal products
+      if (dealProductsCount === items.length && dealProductsCount > 0) {
+modal.alert('🔥 All products in your cart are on special deals! Deal products cannot be combined with coupon codes, but you\'re already getting the best prices.')
+      } else {
+modal.alert(messages[0] || 'Invalid coupon code')
+      }
     }
   }
 
   const handleApplyVoucher = () => {
     if (!voucherCode) {
-      alert('Please enter a voucher code.');
+modal.alert('Please enter a voucher code.')
       return;
     }
     
     const result = applyVoucher(voucherCode);
-    alert(result.message);
+modal.alert(result.message)
     
     if (result.success) {
       setVoucherCode(''); // Clear the input
@@ -176,8 +191,8 @@ const {
                     <div key={item.product._id} className="p-4 md:p-6">
                       {/* Mobile Layout */}
                       <div className="md:hidden">
-                        <div className="flex gap-4 mb-4">
-                          <div className="w-20 h-20 relative flex-shrink-0">
+                        <div className="flex gap-3 mb-4">
+                          <div className="w-16 h-16 relative flex-shrink-0">
                             {item.product.images && item.product.images.length > 0 && (
                               <>
                                 {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
@@ -195,16 +210,32 @@ const {
                                     className="object-cover rounded-lg"
                                   />
                                 ) : (
-                                  <div className="w-full h-full bg-gray-200 rounded-lg" />
+                                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <span className="text-gray-400 text-xs">No Image</span>
+                                  </div>
                                 )}
                               </>
                             )}
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 mb-1 text-sm leading-tight">{item.product.name}</h3>
-                            <p className="text-sm text-gray-500 mb-2">{item.product.sku || 'N/A'}</p>
-                            <p className="font-semibold text-gray-900">${price.toFixed(2)}</p>
-                            {item.product.discount && item.product.discount > 0 && (
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 mb-1 text-sm leading-tight break-words">{item.product.name}</h3>
+                            <p className="text-xs text-gray-500 mb-2 truncate">{item.product.sku || 'N/A'}</p>
+                            
+                            {/* Deal Indicator */}
+                            {item.product.isOnDeal && item.product.dealPercentage && (
+                              <div className="mb-2">
+                                <span className="text-red-600 text-xs font-semibold bg-red-50 px-2 py-1 rounded">
+                                  🔥 DEAL {item.product.dealPercentage}% OFF - No Coupons
+                                </span>
+                              </div>
+                            )}
+                            
+                            <p className={`font-semibold ${
+                              item.product.isOnDeal ? 'text-red-600' : 'text-gray-900'
+                            }`}>${price.toFixed(2)}</p>
+                            
+                            {/* Regular discount indicator - only show if not on deal */}
+                            {!item.product.isOnDeal && item.product.discount && item.product.discount > 0 && (
                               <p className="text-xs text-green-600">{item.product.discount}% OFF</p>
                             )}
                           </div>
@@ -259,7 +290,9 @@ const {
                                     className="object-cover rounded-lg"
                                   />
                                 ) : (
-                                  <div className="w-full h-full bg-gray-200 rounded-lg" />
+                                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                    <span className="text-gray-400 text-xs">No Image</span>
+                                  </div>
                                 )}
                               </>
                             )}
@@ -267,7 +300,18 @@ const {
                         </div>
                         <div className="col-span-4 ml-4">
                           <h3 className="font-medium text-gray-900 text-sm leading-tight">{item.product.name}</h3>
-                          {item.product.discount && item.product.discount > 0 && (
+                          
+                          {/* Deal Indicator */}
+                          {item.product.isOnDeal && item.product.dealPercentage && (
+                            <div className="mt-1">
+                              <span className="text-red-600 text-xs font-semibold bg-red-50 px-2 py-1 rounded">
+                                🔥 DEAL {item.product.dealPercentage}% OFF - No Coupons
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Regular discount indicator - only show if not on deal */}
+                          {!item.product.isOnDeal && item.product.discount && item.product.discount > 0 && (
                             <p className="text-xs text-green-600">{item.product.discount}% OFF</p>
                           )}
                         </div>
@@ -292,8 +336,13 @@ const {
                           </div>
                         </div>
                         <div className="col-span-2">
-                          <span className="font-semibold text-gray-900">${price.toFixed(2)}</span>
-                          {item.product.originalPrice && item.product.discount && item.product.discount > 0 && (
+                          <span className={`font-semibold ${
+                            item.product.isOnDeal ? 'text-red-600' : 'text-gray-900'
+                          }`}>${price.toFixed(2)}</span>
+                          {item.product.originalPrice && (
+                            (item.product.isOnDeal && item.product.dealPercentage && item.product.dealPercentage > 0) ||
+                            (!item.product.isOnDeal && item.product.discount && item.product.discount > 0)
+                          ) && (
                             <span className="text-xs text-gray-500 line-through block">
                               ${item.product.originalPrice.toFixed(2)}
                             </span>
@@ -551,9 +600,9 @@ const {
               )}
               
               {/* Checkout Button */}
-              <button className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors font-medium">
+              <a href="/checkout" className="block w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors font-medium text-center">
                 Next Step
-              </button>
+              </a>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { sanityFetch } from "../lib/live";
-import { BANNER_QUERY, MINI_BANNER_QUERY,FEATURED_PRODUTS , BRANDS, PRODUCT_BY_SLUG, SEARCH_PRODUCTS, ALL_PRODUCTS_DEBUG, ALL_PRODUCTS } from "./query";
+import { BANNER_QUERY, MINI_BANNER_QUERY,FEATURED_PRODUTS , BRANDS, PRODUCT_BY_SLUG, SEARCH_PRODUCTS, ALL_PRODUCTS_DEBUG, ALL_PRODUCTS, DEAL_PRODUCTS } from "./query";
 
 export const getBanner = async () => {
   try {
@@ -97,6 +97,16 @@ export const getAllProducts = async () => {
     return data ?? [];
   } catch (error) {
     console.error("Error fetching all products:", error);
+    return [];
+  }
+};
+
+export const getDealProducts = async () => {
+  try {
+    const { data } = await sanityFetch({ query: DEAL_PRODUCTS });
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching deal products:", error);
     return [];
   }
 };

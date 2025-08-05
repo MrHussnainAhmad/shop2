@@ -1,5 +1,5 @@
 "use client";
-import { AlignLeft, X, Home, ShoppingBag, Heart, User, Phone } from 'lucide-react'
+import { AlignLeft, X, Home, ShoppingBag, User, Phone, ShoppingCart, Tag } from 'lucide-react'
 import React, { useState } from 'react'
 import Link from 'next/link'
 
@@ -12,11 +12,11 @@ const MobileMenu = () => {
 
   const menuItems = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Products', href: '/products', icon: ShoppingBag },
-    { name: 'Categories', href: '/categories', icon: ShoppingBag },
-    { name: 'Wishlist', href: '/wishlist', icon: Heart },
-    { name: 'Account', href: '/account', icon: User },
-    { name: 'Contact', href: '/contact', icon: Phone },
+    { name: 'Shop', href: '/shop', icon: ShoppingBag },
+    { name: 'Deals', href: '/deals', icon: Tag },
+    { name: 'Cart', href: '/cart', icon: ShoppingCart },
+    { name: 'Account', href: '/account/account', icon: User },
+    { name: 'Contact', href: '/contactus', icon: Phone },
   ];
 
   return (
@@ -76,7 +76,7 @@ const MobileMenu = () => {
             {/* Menu Footer - Fixed at bottom of screen */}
             <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-custom-sec3 bg-custom-sec1 bg-opacity-20">
               <p className="text-sm text-custom-text text-center">
-                Need help? <Link href="/contact" className="text-custom-sec3 hover:text-custom-sec4 transition-colors">Contact us</Link>
+                Need help? <Link href="/contactus" className="text-custom-sec3 hover:text-custom-sec4 transition-colors">Contact us</Link>
               </p>
             </div>
           </div>

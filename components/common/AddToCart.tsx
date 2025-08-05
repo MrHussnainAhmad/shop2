@@ -187,14 +187,16 @@ const AddToCart = ({
     );
   }
 
+  // Initialize state for detailed variant
+  const [detailedQuantity, setDetailedQuantity] = React.useState(1);
+
   // Detailed variant (for ProductDetails)
   if (variant === "detailed") {
-    const [localQuantity, setLocalQuantity] = React.useState(1);
 
     const handleDetailedAddToCart = () => {
       if (product) {
         // Add the specified quantity to cart
-        for (let i = 0; i < localQuantity; i++) {
+        for (let i = 0; i < detailedQuantity; i++) {
           addItem(product);
         }
       }
@@ -212,7 +214,7 @@ const AddToCart = ({
             </label>
             <div className="flex items-center border border-gray-300 rounded-md">
               <button
-                onClick={() => setLocalQuantity(Math.max(1, localQuantity - 1))}
+                onClick={() => setDetailedQuantity(Math.max(1, detailedQuantity - 1))}
                 className="px-3 py-1 hover:bg-gray-100 transition-colors"
                 disabled={isOutOfStock}
               >
@@ -223,17 +225,17 @@ const AddToCart = ({
                 type="number"
                 min="1"
                 max={product?.stock || 1}
-                value={localQuantity}
+                value={detailedQuantity}
                 onChange={(e) =>
-                  setLocalQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  setDetailedQuantity(Math.max(1, parseInt(e.target.value) || 1))
                 }
                 className="w-16 px-2 py-1 text-center border-0 focus:outline-none"
                 disabled={isOutOfStock}
               />
               <button
                 onClick={() =>
-                  setLocalQuantity(
-                    Math.min(product?.stock || 1, localQuantity + 1)
+                  setDetailedQuantity(
+                    Math.min(product?.stock || 1, detailedQuantity + 1)
                   )
                 }
                 className="px-3 py-1 hover:bg-gray-100 transition-colors"

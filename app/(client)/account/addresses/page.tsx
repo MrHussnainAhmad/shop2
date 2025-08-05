@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, MapPin, Check } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import { useAlertModal } from "@/components/ui/alert-modal";
 
 interface Address {
   _id?: string;
@@ -19,6 +20,7 @@ interface Address {
 
 const AddressesPage = () => {
   const { user } = useUser();
+  const modal = useAlertModal();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -100,14 +102,15 @@ const AddressesPage = () => {
       resetForm();
     } catch (error) {
       console.error("Error saving address:", error);
-      alert("Error saving address. Please try again.");
+      modal.alert("Error saving address. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (addressId: string) => {
-    if (confirm("Are you sure you want to delete this address?")) {
+    const confirmed = await modal.confirm("Are you sure you want to delete this address?");
+    if (confirmed) {
       try {
         const response = await fetch('/api/addresses', {
           method: 'DELETE',
@@ -124,7 +127,7 @@ const AddressesPage = () => {
         await fetchAddresses();
       } catch (error) {
         console.error("Error deleting address:", error);
-        alert("Error deleting address. Please try again.");
+        modal.alert("Error deleting address. Please try again.");
       }
     }
   };
@@ -149,7 +152,7 @@ const AddressesPage = () => {
       await fetchAddresses();
     } catch (error) {
       console.error("Error setting default address:", error);
-      alert("Error setting default address. Please try again.");
+      modal.alert("Error setting default address. Please try again.");
     }
   };
 

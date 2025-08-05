@@ -34,19 +34,32 @@ export const useAddresses = () => {
         return;
       }
       
-      const response = await fetch(`/api/addresses?email=${encodeURIComponent(userEmail)}`);
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`/api/addresses?email=${encodeURIComponent(userEmail)}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const result = await response.json();
-        setAddresses(result);
+        setAddresses(result || []);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to fetch addresses');
         console.error('Failed to fetch addresses:', errorData);
+        // Set empty array as fallback
+        setAddresses([]);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(errorMessage);
       console.error("Error fetching addresses:", error);
+      // Set empty array as fallback
+      setAddresses([]);
     } finally {
       setLoading(false);
     }

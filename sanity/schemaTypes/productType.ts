@@ -237,6 +237,30 @@ export const productType = defineType({
       },
     }),
     defineField({
+      name: "isOnDeal",
+      title: "Is on Deal?",
+      type: "boolean",
+      description: "Mark this product as a special deal. Deal products cannot use coupon or voucher codes.",
+      initialValue: false,
+    }),
+    defineField({
+      name: "dealPercentage",
+      title: "Deal Discount Percentage",
+      type: "number",
+      description: "Special deal discount percentage (0-100). This is separate from regular discount.",
+      validation: (Rule) => Rule.custom((value, context) => {
+        const isOnDeal = context.document?.isOnDeal;
+        if (isOnDeal && (!value || value <= 0)) {
+          return "Deal percentage is required when product is on deal";
+        }
+        if (value && (value < 0 || value > 100)) {
+          return "Deal percentage must be between 0 and 100";
+        }
+        return true;
+      }),
+      hidden: ({ document }) => !document?.isOnDeal,
+    }),
+    defineField({
       name: "tags",
       title: "Tags",
       type: "array",

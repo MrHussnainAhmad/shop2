@@ -47,7 +47,7 @@ const ImageView = ({ images = [], isStock }: Props) => {
   
   // Helper function to get image URL based on image type
   const getImageUrl = (image: any) => {
-    if (!image) return '/placeholder-image.jpg';
+    if (!image) return '/placeholder-product.svg';
     
     try {
       // If it's a direct URL type, return the URL directly
@@ -61,10 +61,10 @@ const ImageView = ({ images = [], isStock }: Props) => {
       }
     } catch (error) {
       console.error('Error processing image URL:', error, image);
-      return '/placeholder-image.jpg';
+      return '/placeholder-product.svg';
     }
     
-    return '/placeholder-image.jpg';
+    return '/placeholder-product.svg';
   };
   const openModal = (index: number) => {
     setInitialSlide(index);

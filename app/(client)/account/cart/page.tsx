@@ -57,71 +57,146 @@ const AccountCartPage = () => {
           const itemTotal = price * item.quantity;
           
           return (
-            <div key={item.product._id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-              {/* Product Image */}
-              <div className="w-16 h-16 relative flex-shrink-0">
-                {item.product.images && item.product.images.length > 0 && (
-                  <>
-                    {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
-                      <Image
-                        src={urlFor(item.product.images[0]).url()}
-                        alt={item.product.name || 'Product'}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
-                      <Image
-                        src={item.product.images[0].url}
-                        alt={item.product.images[0].alt || item.product.name || 'Product'}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 rounded-lg" />
-                    )}
-                  </>
-                )}
-              </div>
+            <div key={item.product._id} className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-200 rounded-lg">
+              {/* Mobile Layout */}
+              <div className="flex gap-3 sm:hidden">
+                {/* Product Image */}
+                <div className="w-16 h-16 relative flex-shrink-0">
+                  {item.product.images && item.product.images.length > 0 && (
+                    <>
+                      {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
+                        <Image
+                          src={urlFor(item.product.images[0]).url()}
+                          alt={item.product.name || 'Product'}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
+                        <Image
+                          src={item.product.images[0].url}
+                          alt={item.product.images[0].alt || item.product.name || 'Product'}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-lg" />
+                      )}
+                    </>
+                  )}
+                </div>
 
-              {/* Product Details */}
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-900 mb-1">{item.product.name}</h3>
-                <p className="text-sm text-gray-500">{item.product.sku || 'N/A'}</p>
-                <p className="font-semibold text-gray-900">${price.toFixed(2)}</p>
-                {item.product.discount && item.product.discount > 0 && (
-                  <p className="text-xs text-green-600">{item.product.discount}% OFF</p>
-                )}
-              </div>
+                {/* Product Details */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 mb-1 text-sm break-words">{item.product.name}</h3>
+                  <p className="text-xs text-gray-500 truncate">{item.product.sku || 'N/A'}</p>
+                  <p className="font-semibold text-gray-900 text-sm">${price.toFixed(2)}</p>
+                  {item.product.discount && item.product.discount > 0 && (
+                    <p className="text-xs text-green-600">{item.product.discount}% OFF</p>
+                  )}
+                </div>
 
-              {/* Quantity Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                  className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                {/* Remove Button */}
+                <button 
+                  onClick={() => removeItem(item.product._id)}
+                  className="text-red-500 hover:text-red-700 p-1 self-start"
                 >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="w-8 text-center font-medium">{item.quantity}</span>
-                <button
-                  onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                  className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
-                >
-                  <Plus className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Item Total */}
-              <div className="text-right min-w-[80px]">
-                <p className="font-semibold text-gray-900">${itemTotal.toFixed(2)}</p>
+              {/* Mobile Bottom Section */}
+              <div className="flex items-center justify-between sm:hidden">
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
+                    className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
+                    className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Item Total */}
+                <div className="text-right">
+                  <p className="font-semibold text-gray-900">${itemTotal.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500">Total</p>
+                </div>
               </div>
 
-              {/* Remove Button */}
-              <button 
-                onClick={() => removeItem(item.product._id)}
-                className="text-red-500 hover:text-red-700 p-1"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex sm:items-center sm:gap-4">
+                {/* Product Image */}
+                <div className="w-16 h-16 relative flex-shrink-0">
+                  {item.product.images && item.product.images.length > 0 && (
+                    <>
+                      {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
+                        <Image
+                          src={urlFor(item.product.images[0]).url()}
+                          alt={item.product.name || 'Product'}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
+                        <Image
+                          src={item.product.images[0].url}
+                          alt={item.product.images[0].alt || item.product.name || 'Product'}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-lg" />
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Product Details */}
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900 mb-1">{item.product.name}</h3>
+                  <p className="text-sm text-gray-500">{item.product.sku || 'N/A'}</p>
+                  <p className="font-semibold text-gray-900">${price.toFixed(2)}</p>
+                  {item.product.discount && item.product.discount > 0 && (
+                    <p className="text-xs text-green-600">{item.product.discount}% OFF</p>
+                  )}
+                </div>
+
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
+                    className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
+                    className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Item Total */}
+                <div className="text-right min-w-[80px]">
+                  <p className="font-semibold text-gray-900">${itemTotal.toFixed(2)}</p>
+                </div>
+
+                {/* Remove Button */}
+                <button 
+                  onClick={() => removeItem(item.product._id)}
+                  className="text-red-500 hover:text-red-700 p-1"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           )
         })}

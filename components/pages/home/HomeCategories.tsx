@@ -31,7 +31,7 @@ const HomeCategories = ({ categories }: Props) => {
       </div>
       <div className="mt-10 grid grid-cols-4 md:grid-cols-5 gap-2.5">
         {categories.map((category) => (
-          <Link key={category._id} href={`/category/${category?.slug?.current}`}>
+          <Link key={category._id} href={`/shop/category/${category?.slug?.current}`}>
             <div className="p-3 flex flex-col items-center gap-3 border border-transparent hover:border-orange-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-custom-text">
               {category?.image ? (
                 <div className="w-12 h-12 md:w-16 md:h-16 overflow-hidden ">

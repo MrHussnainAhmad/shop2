@@ -10,6 +10,7 @@ interface FormData {
   phoneNumber: string;
 }
 
+
 const EditProfilePage = () => {
   const { user, isLoaded } = useUser();
   const [loading, setLoading] = useState(false);
@@ -23,13 +24,47 @@ const EditProfilePage = () => {
 
   // Load user data when component mounts
   useEffect(() => {
-    if (isLoaded && user) {
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        phoneNumber: user.phoneNumbers?.[0]?.phoneNumber || "",
-      });
-    }
+    const loadUserProfile = async () => {
+      if (isLoaded && user) {
+        try {
+          // First try to load from our API
+          const response = await fetch('/api/user/profile');
+          if (response.ok) {
+            const profile = await response.json();
+            if (profile) {
+              setFormData({
+                firstName: profile.firstName || user.firstName || "",
+                lastName: profile.lastName || user.lastName || "",
+                phoneNumber: profile.phoneNumber || user.phoneNumbers?.[0]?.phoneNumber || "",
+              });
+            } else {
+              // Fallback to Clerk data
+              setFormData({
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                phoneNumber: user.phoneNumbers?.[0]?.phoneNumber || "",
+              });
+            }
+          } else {
+            // Fallback to Clerk data
+            setFormData({
+              firstName: user.firstName || "",
+              lastName: user.lastName || "",
+              phoneNumber: user.phoneNumbers?.[0]?.phoneNumber || "",
+            });
+          }
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+          // Fallback to Clerk data
+          setFormData({
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            phoneNumber: user.phoneNumbers?.[0]?.phoneNumber || "",
+          });
+        }
+      }
+    };
+    loadUserProfile();
   }, [isLoaded, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,47 +75,46 @@ const EditProfilePage = () => {
     }));
   };
 
+  const updateOrCreateUserProfile = async () => {
+    if (!user) return;
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phoneNumber: formData.phoneNumber,
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update profile');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    
+
     setLoading(true);
     setSuccessMessage("");
     setErrorMessage("");
 
     try {
-      let hasUpdates = false;
-
-      // Handle phone number update
-      const currentPhone = user.phoneNumbers?.[0]?.phoneNumber;
-      if (formData.phoneNumber && formData.phoneNumber !== currentPhone) {
-        try {
-          if (user.phoneNumbers.length > 0) {
-            // Delete existing phone number
-            await user.phoneNumbers[0].destroy();
-          }
-          
-          if (formData.phoneNumber.trim()) {
-            // Add new phone number
-            await user.createPhoneNumber({ phoneNumber: formData.phoneNumber });
-            hasUpdates = true;
-          }
-        } catch (phoneError: any) {
-          console.warn("Phone number update failed:", phoneError);
-          setErrorMessage("Phone number update failed. Please try again.");
-        }
-      }
-
-      // For now, we'll show a message that name updates require admin intervention
-      const nameChanged = formData.firstName !== user.firstName || formData.lastName !== user.lastName;
+      await updateOrCreateUserProfile();
+      setSuccessMessage("Profile updated successfully!");
       
-      if (nameChanged) {
-        setErrorMessage("Name updates are currently not supported through this interface. Please contact support to update your name.");
-      } else if (hasUpdates) {
-        setSuccessMessage("Profile updated successfully!");
-      } else {
-        setSuccessMessage("No changes detected.");
-      }
+      // Trigger header refresh by dispatching custom event
+      window.dispatchEvent(new CustomEvent('userProfileUpdated'));
       
       // Clear messages after 5 seconds
       setTimeout(() => {
@@ -89,7 +123,7 @@ const EditProfilePage = () => {
       }, 5000);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      setErrorMessage(error.errors?.[0]?.message || error.message || "Failed to update profile. Please try again.");
+      setErrorMessage(error.message || "Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }

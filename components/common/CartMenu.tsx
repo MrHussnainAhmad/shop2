@@ -2,13 +2,21 @@
 import { ShoppingCart, Heart, GitCompare, X } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { useCart } from "../../contexts/CartContext";
+import useCartStore from '@/store';
+import useWishlistStore from '@/store/wishlistStore';
 
 const CartMenu = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { cartCount } = useCart();
-  // You can add wishlist and compare counts here later
-  const wishlistCount = 0;
+  const [mounted, setMounted] = React.useState(false);
+  const { getTotalItems } = useCartStore();
+  const { getTotalItems: getWishlistItems } = useWishlistStore();
+  const cartCount = mounted ? getTotalItems() : 0;
+  const wishlistCount = mounted ? getWishlistItems() : 0;
+  
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+  // You can add compare count here later
   const compareCount = 0;
 
   return (
@@ -22,7 +30,7 @@ const CartMenu = () => {
               aria-label={`Shopping cart with ${cartCount} items`}
             >
               <ShoppingCart size={20} aria-hidden="true" />
-              {cartCount > 0 && (
+            {cartCount > 0 && (
                 <span
                   className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full"
                   aria-label={`${cartCount} items in cart`}
