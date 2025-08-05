@@ -10,13 +10,6 @@ import { useAlertModal } from "@/components/ui/alert-modal";
 const ShareBadge = ({ product }: { product?: Product }) => {
   const modal = useAlertModal();
   
-  // Debug logging
-  React.useEffect(() => {
-    console.log('ShareBadge product data:', product);
-    console.log('Product slug:', product?.slug);
-    console.log('Product slug current:', product?.slug?.current);
-    console.log('Product _id:', product?._id);
-  }, [product]);
   const handleShare = (platform: string) => {
     if (typeof window === 'undefined') return;
     
@@ -72,8 +65,7 @@ const ShareBadge = ({ product }: { product?: Product }) => {
     }
     
     if (!productId) {
-      console.error('Product data:', product);
-modal.alert("Cannot identify product for comparison. Please try again.");
+      modal.alert("Cannot identify product for comparison. Please try again.");
       return;
     }
     

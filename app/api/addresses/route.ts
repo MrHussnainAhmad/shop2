@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const { userId } = await auth();
     
     if (!userId) {
-      console.error('No userId found in auth');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -26,14 +25,11 @@ export async function GET(request: NextRequest) {
     const email = searchParams.get('email');
 
     if (!email) {
-      console.error('No email parameter provided');
       return NextResponse.json({ error: 'Email parameter required' }, { status: 400 });
     }
 
-    console.log('Fetching addresses for email:', email);
     const query = `*[_type == "address" && email == "${email}"] | order(_createdAt desc)`;
     const addresses = await client.fetch(query);
-    console.log('Found addresses:', addresses.length);
 
     return NextResponse.json(addresses);
   } catch (error) {
@@ -48,12 +44,10 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     
     if (!userId) {
-      console.error('No userId found in auth for POST');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log('POST body:', body);
     
     // If this is set as default, update other addresses first
     if (body.isDefault) {
@@ -66,12 +60,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('Creating address with data:', body);
     const result = await writeClient.create({
       _type: 'address',
       ...body,
     });
-    console.log('Address created:', result);
 
     return NextResponse.json(result);
   } catch (error) {

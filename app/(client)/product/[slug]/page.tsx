@@ -15,17 +15,9 @@ const singleProductPage = async ({
   const { slug } = await params;
   const product:Product = await getProductBySlug(slug);
 
-  // Debug logging
-  console.log('Product slug:', slug);
-  console.log('Product data:', product);
-  console.log('Product images:', product?.images);
-  console.log('Product name:', product?.name);
-
-  // Also fetch and log available products for debugging
+  // Fetch debug data for error handling
   const allProducts = await getAllProductsDebug();
   const featuredProducts = await getFeaturedProducts();
-  console.log('All available products:', allProducts);
-  console.log('Featured products:', featuredProducts);
 
   if (!product) {
     return (

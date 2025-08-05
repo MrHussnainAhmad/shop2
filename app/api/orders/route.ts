@@ -13,20 +13,12 @@ const serverClient = createClient({
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 Orders API called');
     const { userId } = await auth();
-    console.log('👤 User ID:', userId);
     
     if (!userId) {
-      console.log('❌ No user ID found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // First try a simple query to test connection
-    const simpleQuery = `*[_type == "order"]`;
-    const allOrders = await serverClient.fetch(simpleQuery);
-    console.log('🗂️ All orders in database:', allOrders.length);
-    
     const query = `*[_type == "order" && userId == $userId] | order(createdAt desc) {
       _id,
       paymentIntentId,
@@ -44,12 +36,8 @@ export async function GET(request: NextRequest) {
       createdAt,
       updatedAt
     }`;
-
-    console.log('📝 Query:', query);
-    console.log('🔍 Fetching orders for user:', userId);
     
     const orders = await serverClient.fetch(query, { userId });
-    console.log('📦 Orders found:', orders.length);
     
     return NextResponse.json(orders);
   } catch (error) {

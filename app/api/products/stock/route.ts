@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       .set(updateData)
       .commit();
     
-    console.log(`✅ Stock updated for "${product.name}": ${product.stock} → ${finalStock}`);
+    // Stock updated successfully
     
     return NextResponse.json({
       success: true,

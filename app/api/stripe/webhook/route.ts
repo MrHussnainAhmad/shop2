@@ -79,7 +79,7 @@ async function handleWebhookEvent(event: any) {
       break;
     
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      // Unhandled event type
   }
 }
 
@@ -181,8 +181,7 @@ async function handlePaymentFailed(paymentIntent: any) {
     const { id, metadata } = paymentIntent;
     const userId = metadata.userId;
 
-    // You might want to log this failure or notify the user
-    console.log(`Payment failed for user ${userId}, payment intent: ${id}`);
+    // Payment failed - could be logged to monitoring service
 
     // Optionally create a failed order record
     const failedOrder = {
@@ -208,7 +207,7 @@ async function handlePaymentCanceled(paymentIntent: any) {
     const { id, metadata } = paymentIntent;
     const userId = metadata.userId;
 
-    console.log(`Payment canceled for user ${userId}, payment intent: ${id}`);
+    // Payment canceled - could be logged to monitoring service
 
     // Optionally create a canceled order record
     const canceledOrder = {

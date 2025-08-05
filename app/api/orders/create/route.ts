@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
     const existingOrder = await serverClient.fetch(existingOrderQuery, { paymentIntentId });
 
     if (existingOrder) {
-      console.log('Order already exists:', existingOrder._id);
       return NextResponse.json({ 
         success: true, 
         orderId: existingOrder._id,
@@ -81,9 +80,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log('Creating order:', order);
     const result = await serverClient.create(order);
-    console.log('Order created successfully:', result._id);
 
     return NextResponse.json({ 
       success: true, 

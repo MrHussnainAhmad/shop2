@@ -44,7 +44,6 @@ const Searchbar = () => {
     setLoading(true);
     try {
       const results = await searchProductsClient(searchTerm);
-      console.log('Search results:', results); // Debug log
       setProducts(results);
     } catch (error) {
       console.error('Search error:', error);
