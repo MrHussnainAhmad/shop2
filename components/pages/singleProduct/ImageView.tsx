@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  internalGroqTypeReferenceTo,
-  SanityImageHotspot,
-  SanityImageCrop,
-} from "@/sanity.types";
 import React from "react";
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
-import { urlFor } from "@/sanity/lib/image";
-import { image } from "@/sanity/image";
 import Image from "next/image";
 import { X } from "lucide-react";
 import {
@@ -20,23 +13,7 @@ import {
 } from "@/components/ui/carousel";
 
 interface Props {
-  images?: Array<{
-    asset?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-    };
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    _type?: "image";
-    _key: string;
-  } | {
-    url: string;
-    alt?: string;
-    _type: "imageUrl";
-    _key: string;
-  }>;
+  images?: string[]; // Changed to string[] as we are storing direct URLs
   isStock?: number;
 }
 
@@ -44,28 +21,13 @@ const ImageView = ({ images = [], isStock }: Props) => {
   const [active, setActive] = React.useState(images[0]);
   const [showModal, setShowModal] = React.useState(false);
   const [initialSlide, setInitialSlide] = React.useState(0);
-  
-  // Helper function to get image URL based on image type
-  const getImageUrl = (image: any) => {
+
+  // Helper function to get image URL (now directly from the array)
+  const getImageUrl = (image: string) => {
     if (!image) return '/placeholder-product.svg';
-    
-    try {
-      // If it's a direct URL type, return the URL directly
-      if (image._type === 'imageUrl' && image.url) {
-        return image.url;
-      }
-      
-      // If it's a Sanity asset reference, use urlFor
-      if (image.asset || image._type === 'image') {
-        return urlFor(image).url();
-      }
-    } catch (error) {
-      console.error('Error processing image URL:', error, image);
-      return '/placeholder-product.svg';
-    }
-    
-    return '/placeholder-product.svg';
+    return image;
   };
+
   const openModal = (index: number) => {
     setInitialSlide(index);
     setShowModal(true);
@@ -81,14 +43,14 @@ const ImageView = ({ images = [], isStock }: Props) => {
       <div className="w-full md:w-2/5 space-y-2 md:space-y-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={active?._key}
+            key={active} // Changed key to use the image string directly
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
             className="w-full max-h-[500px] min-h-[450px] border border-black/10 rounded-md group overflow-hidden cursor-pointer"
             onClick={() =>
-              openModal(images.findIndex((img) => img._key === active._key))
+              openModal(images.findIndex((img) => img === active)) // Changed findIndex to use image string
             }
           >
             <Image
@@ -105,12 +67,12 @@ const ImageView = ({ images = [], isStock }: Props) => {
           {images?.map((image) => (
             <button
               onClick={() => setActive(image)}
-              key={image?._key}
-              className={`border rounded-md overflow-hidden ${active._key === image._key ? "ring-1 ring-black" : ""}`}
+              key={image} // Changed key to use the image string directly
+              className={`border rounded-md overflow-hidden ${active === image ? "ring-1 ring-black" : ""}`}
             >
               <Image
                 src={getImageUrl(image)}
-                alt={`Thumbnail ${image._key}`}
+                alt={`Thumbnail ${image}`} // Changed alt to use image string
                 width={100}
                 height={100}
                 className={`w-full h-auto object-contain`}
@@ -144,11 +106,11 @@ const ImageView = ({ images = [], isStock }: Props) => {
               <Carousel className="w-full" opts={{startIndex: initialSlide}}>
                 <CarouselContent>
                   {images?.map((image) => (
-                    <CarouselItem key={image._key}>
+                    <CarouselItem key={image}> // Changed key to use image string
                       <div className="flex items-center justify-center h-[500px]">
                         <Image
                           src={getImageUrl(image)}
-                          alt={`Image ${image._key}`}
+                          alt={`Image ${image}`} // Changed alt to use image string
                           width={800}
                           height={800}
                           className="max-h-full object-contain"

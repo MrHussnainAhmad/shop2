@@ -2,9 +2,6 @@
 import React from 'react'
 import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react'
 import useCartStore from '@/store'
-import { useUser } from '@clerk/nextjs'
-import Image from 'next/image'
-import { urlFor } from '@/sanity/lib/image'
 
 const AccountCartPage = () => {
   const { user } = useUser()
@@ -63,25 +60,12 @@ const AccountCartPage = () => {
                 {/* Product Image */}
                 <div className="w-16 h-16 relative flex-shrink-0">
                   {item.product.images && item.product.images.length > 0 && (
-                    <>
-                      {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
-                        <Image
-                          src={urlFor(item.product.images[0]).url()}
-                          alt={item.product.name || 'Product'}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
-                        <Image
-                          src={item.product.images[0].url}
-                          alt={item.product.images[0].alt || item.product.name || 'Product'}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 rounded-lg" />
-                      )}
-                    </>
+                    <Image
+                      src={item.product.images[0]}
+                      alt={item.product.name || 'Product'}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
                   )}
                 </div>
 
@@ -135,25 +119,12 @@ const AccountCartPage = () => {
                 {/* Product Image */}
                 <div className="w-16 h-16 relative flex-shrink-0">
                   {item.product.images && item.product.images.length > 0 && (
-                    <>
-                      {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
-                        <Image
-                          src={urlFor(item.product.images[0]).url()}
-                          alt={item.product.name || 'Product'}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
-                        <Image
-                          src={item.product.images[0].url}
-                          alt={item.product.images[0].alt || item.product.name || 'Product'}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 rounded-lg" />
-                      )}
-                    </>
+                    <Image
+                      src={item.product.images[0]}
+                      alt={item.product.name || 'Product'}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
                   )}
                 </div>
 

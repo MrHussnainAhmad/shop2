@@ -54,7 +54,7 @@ const AddressesPage = () => {
         return;
       }
       
-      const response = await fetch(`/api/addresses?email=${encodeURIComponent(userEmail)}`);
+      const response = await fetch(`/api/addresses`);
       if (response.ok) {
         const result = await response.json();
         setAddresses(result);
@@ -84,7 +84,7 @@ const AddressesPage = () => {
         addressData._id = editingAddress._id;
       }
 
-      const response = await fetch('/api/addresses', {
+      const response = await fetch(editingAddress?._id ? `/api/addresses/${editingAddress._id}` : '/api/addresses', {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -112,12 +112,8 @@ const AddressesPage = () => {
     const confirmed = await modal.confirm("Are you sure you want to delete this address?");
     if (confirmed) {
       try {
-        const response = await fetch('/api/addresses', {
+        const response = await fetch(`/api/addresses/${addressId}`, {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ addressId }),
         });
 
         if (!response.ok) {

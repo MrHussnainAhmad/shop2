@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { searchProductsClient } from "@/sanity/queries/client";
+import { searchProducts } from "@/lib/api";
 import { Product } from "@/sanity.types";
 
 const Comparison = () => {
@@ -21,7 +21,7 @@ const Comparison = () => {
         setSearchOne(term);
         if (term.trim().length > 2) {
             try {
-                const results = await searchProductsClient(term.trim());
+                const results = await searchProducts(term.trim());
                 setSearchResults1(results || []);
                 setShowResults1(true);
             } catch (error) {
@@ -39,7 +39,7 @@ const Comparison = () => {
         setSearchTwo(term);
         if (term.trim().length > 2) {
             try {
-                const results = await searchProductsClient(term.trim());
+                const results = await searchProducts(term.trim());
                 setSearchResults2(results || []);
                 setShowResults2(true);
             } catch (error) {

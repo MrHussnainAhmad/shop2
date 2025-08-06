@@ -5,16 +5,8 @@ import Container from "./Container";
 import Link from "next/link";
 import { Youtube, Github, Linkedin, Facebook, Slack } from "lucide-react";
 import Logo from "./Logo";
-import { client } from "@/sanity/lib/client";
-
-interface Category {
-  _id: string;
-  name: string;
-  slug: {
-    current: string;
-  };
-  productCount?: number;
-}
+import { getCategories } from "@/lib/api";
+import { Category } from '@/models/Category';
 
 const date = new Date();
 
@@ -25,10 +17,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await client.fetch(`*[_type == "category"] | order(name asc)[0...6]{
-          ...,
-          "productCount": count(*[_type == "product" && references(^._id)])
-        }`);
+        const data = await getCategories();
         setCategories(data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -69,7 +58,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="#"
-                className="text-gray-600 hover:text-red-500 transition-colors"
+                className="text-600 hover:text-red-500 transition-colors"
               >
                 <Linkedin size={20} />
               </Link>
@@ -149,7 +138,7 @@ const Footer = () => {
                 categories.map((category: Category) => (
                   <li key={category._id}>
                     <Link
-                      href={`/shop/${category.slug.current}`}
+                      href={`/shop/category/${category.slug.current}`}
                       className="text-gray-600 hover:text-red-500 transition-colors"
                     >
                       {category.name}

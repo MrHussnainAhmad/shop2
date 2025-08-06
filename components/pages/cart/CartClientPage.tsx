@@ -4,7 +4,6 @@ import { Trash2, Plus, Minus, ShoppingBag, Truck, Shield, CreditCard, Tag, Perce
 import useCartStore from '@/store'
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
-import { urlFor } from '@/sanity/lib/image'
 import { useAddresses } from '@/hooks/useAddresses'
 import { useAlertModal } from '@/components/ui/alert-modal'
 

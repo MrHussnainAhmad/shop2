@@ -105,15 +105,8 @@ const ProductCard = ({ product, ...directProps }: ProductCardProps) => {
   // Get image URL handling both Sanity images and URL images
   const getImageUrl = () => {
     if (productData?.images && productData.images.length > 0) {
-      const firstImage = productData.images[0];
-
-      if (firstImage._type === "image") {
-        // Sanity image - use image() function with 900x700 dimensions
-        return image(firstImage).width(900).height(700).url();
-      } else if (firstImage._type === "imageUrl" && firstImage.url) {
-        // URL image - use direct URL
-        return firstImage.url;
-      }
+      // Assuming images are now direct URLs from Cloudinary
+      return productData.images[0];
     }
     return null;
   };

@@ -1,9 +1,8 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { urlFor } from "@/sanity/lib/image";
-import { getMiniBanner } from "@/sanity/queries";
-import { MINI_BANNER_QUERYResult } from "@/sanity.types";
+import { getMiniBanner } from "@/lib/api";
+import { Banner } from '@/models/Banner';
 
 const MiniBanner = async () => {
   const miniBanners = await getMiniBanner();
@@ -14,12 +13,12 @@ const MiniBanner = async () => {
 
   return (
     <div className="flex flex-col gap-2 h-full">
-      {miniBanners.map((item: MINI_BANNER_QUERYResult[0], index: number) => {
+      {miniBanners.map((item: Banner, index: number) => {
         const MiniBannerContent = (
           <div className="relative w-full h-full min-h-[160px] rounded-md overflow-hidden bg-gray-100 group">
             {item?.image && (
               <Image
-                src={urlFor(item.image).url()}
+                src={item.image}
                 alt={item?.name || `Mini Banner ${index + 1}`}
                 className={`object-cover w-full h-full transition-transform duration-300 ${
                   item?.link ? 'group-hover:scale-105' : ''

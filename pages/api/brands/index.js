@@ -1,39 +1,27 @@
-
-import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
 import dbConnect from '../../../lib/db';
 import Brand from '../../../models/Brand';
 
 const router = createRouter();
 
-router
-  .get(async (req, res) => {
-    await dbConnect();
-    try {
-      const brands = await Brand.find({});
-      res.status(200).json(brands);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch brands' });
-    }
-  })
-  .post(async (req, res) => {
-    const { userId } = auth(req);
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const user = await clerkClient.users.getUser(userId);
-    if (!user.privateMetadata.isAdmin) {
-        return res.status(403).json({ error: 'Forbidden' });
-    }
-
-    await dbConnect();
-    try {
-      const brand = await Brand.create(req.body);
-      res.status(201).json(brand);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to create brand' });
-    }
-  });
+router.get(async (req, res) => {
+  await dbConnect();
+  try {
+    const brands = await Brand.find({});
+    res.status(200).json(brands);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch brands' });
+  }
+})
+.post(async (req, res) => {
+  await dbConnect();
+  try {
+    const brand = await Brand.create(req.body);
+    res.status(201).json(brand);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create brand' });
+  }
+});
 
 export default router.handler({
   onError: (err, req, res) => {

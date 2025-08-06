@@ -2,7 +2,7 @@ import Container from '@/components/common/Container'
 import Title from '@/components/common/Title'
 import Link from 'next/link'
 import React from 'react'
-import { getAllBrands } from '@/sanity/queries'
+import { getAllBrands } from '@/lib/api'
 import { GitCompareArrows, Headset, ShieldCheck, Truck } from 'lucide-react'
 import Image from 'next/image'
 import { Brand } from '@/sanity.types'
@@ -52,7 +52,7 @@ className="p-4 border border-gray-300 rounded-md hover:bg-gray-50 hover:border-r
           >
             {brand?.logo && (
               <Image
-                src={urlFor(brand?.logo).url()}
+                src={brand?.logo}
                 className="w-32 h-32 object-contain"
                 alt="brand"
                 width={250}

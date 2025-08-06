@@ -1,5 +1,5 @@
 import React from 'react'
-import { getFeaturedProducts } from '../../sanity/queries/index';
+import { getFeaturedProducts } from "@/lib/api";
 import Container from './Container';
 import Title from './Title';
 import ProductCard from './ProductCard';

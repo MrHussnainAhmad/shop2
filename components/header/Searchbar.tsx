@@ -43,7 +43,7 @@ const Searchbar = () => {
 
     setLoading(true);
     try {
-      const results = await searchProductsClient(searchTerm);
+      const results = await searchProducts(searchTerm);
       setProducts(results);
     } catch (error) {
       console.error('Search error:', error);

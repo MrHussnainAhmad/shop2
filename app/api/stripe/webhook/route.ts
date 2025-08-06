@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, verifyStripeSignature } from '@/lib/stripe';
-import { createClient } from 'next-sanity';
-
-// Create a server-side client with write permissions
-const serverClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  apiVersion: '2023-05-03',
-  useCdn: false,
-  token: process.env.SANITY_TOKEN, // Server-side write token
-});
+import dbConnect from '@/lib/db';
+import Order from '@/models/Order';
+import Product from '@/models/Product';
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,6 +77,7 @@ async function handleWebhookEvent(event: any) {
 }
 
 async function handlePaymentSuccess(paymentIntent: any) {
+  await dbConnect();
   try {
     
     const {
@@ -97,8 +91,7 @@ async function handlePaymentSuccess(paymentIntent: any) {
 
 
     // Check if order already exists to prevent duplicates
-    const existingOrderQuery = `*[_type == "order" && paymentIntentId == $paymentIntentId][0]`;
-    const existingOrder = await serverClient.fetch(existingOrderQuery, { paymentIntentId: id });
+    const existingOrder = await Order.findOne({ paymentIntentId: id });
     
     if (existingOrder) {
       return existingOrder;
@@ -135,9 +128,8 @@ async function handlePaymentSuccess(paymentIntent: any) {
       // Silent fail for address parsing
     }
 
-    // Create order in Sanity
+    // Create order in MongoDB
     const order = {
-      _type: 'order',
       paymentIntentId: id,
       userId,
       items: items.map((item: any) => ({
@@ -160,8 +152,8 @@ async function handlePaymentSuccess(paymentIntent: any) {
     };
 
 
-    // Save order to Sanity
-    const result = await serverClient.create(order);
+    // Save order to MongoDB
+    const result = await Order.create(order);
 
     // Reduce stock for each purchased item
     await reduceProductStock(items);
@@ -177,6 +169,7 @@ async function handlePaymentSuccess(paymentIntent: any) {
 }
 
 async function handlePaymentFailed(paymentIntent: any) {
+  await dbConnect();
   try {
     const { id, metadata } = paymentIntent;
     const userId = metadata.userId;
@@ -185,7 +178,6 @@ async function handlePaymentFailed(paymentIntent: any) {
 
     // Optionally create a failed order record
     const failedOrder = {
-      _type: 'order',
       paymentIntentId: id,
       userId,
       status: 'failed',
@@ -194,7 +186,7 @@ async function handlePaymentFailed(paymentIntent: any) {
       updatedAt: new Date().toISOString(),
     };
 
-    await serverClient.create(failedOrder);
+    await Order.create(failedOrder);
 
   } catch (error) {
     console.error('Error handling payment failure:', error);
@@ -203,6 +195,7 @@ async function handlePaymentFailed(paymentIntent: any) {
 }
 
 async function handlePaymentCanceled(paymentIntent: any) {
+  await dbConnect();
   try {
     const { id, metadata } = paymentIntent;
     const userId = metadata.userId;
@@ -211,7 +204,6 @@ async function handlePaymentCanceled(paymentIntent: any) {
 
     // Optionally create a canceled order record
     const canceledOrder = {
-      _type: 'order',
       paymentIntentId: id,
       userId,
       status: 'canceled',
@@ -220,7 +212,7 @@ async function handlePaymentCanceled(paymentIntent: any) {
       updatedAt: new Date().toISOString(),
     };
 
-    await serverClient.create(canceledOrder);
+    await Order.create(canceledOrder);
 
   } catch (error) {
     console.error('Error handling payment cancellation:', error);
@@ -229,24 +221,22 @@ async function handlePaymentCanceled(paymentIntent: any) {
 }
 
 /**
- * Reduces stock quantity for purchased products in Sanity
+ * Reduces stock quantity for purchased products in MongoDB
  * @param {Array} items - Array of purchased items with productId and quantity
  */
 async function reduceProductStock(items: any[]) {
-  
+  await dbConnect();
   for (const item of items) {
     try {
-      // Note: item.id comes from the payment intent metadata, we need to use it as productId
       const productId = item.id;
-      const { quantity, name } = item;
+      const { quantity } = item;
       
       if (!productId || !quantity || quantity <= 0) {
         continue;
       }
 
       // First, get the current product data
-      const productQuery = `*[_type == "product" && _id == $productId][0]{ _id, name, stock, status }`;
-      const product = await serverClient.fetch(productQuery, { productId });
+      const product = await Product.findById(productId);
       
       if (!product) {
         continue;
@@ -267,10 +257,7 @@ async function reduceProductStock(items: any[]) {
       }
 
       // Perform the update
-      await serverClient
-        .patch(productId)
-        .set(updateData)
-        .commit();
+      await Product.findByIdAndUpdate(productId, updateData);
 
       
     } catch (error) {

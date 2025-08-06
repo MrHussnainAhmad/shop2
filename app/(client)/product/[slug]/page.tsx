@@ -1,5 +1,5 @@
 import React from "react";
-import { getProductBySlug, getAllProductsDebug, getFeaturedProducts } from "@/sanity/queries";
+import { getProductBySlug, getAllProductsDebug, getFeaturedProducts } from "@/lib/api";
 import Container from "@/components/common/Container";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ShareBadge from "@/components/pages/singleProduct/ShareBadge";

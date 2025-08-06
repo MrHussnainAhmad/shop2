@@ -1,8 +1,8 @@
 
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
-import dbConnect from '../../../../lib/db';
-import Banner from '../../../../models/Banner';
+import dbConnect from '../../../lib/db';
+import Banner from '../../../models/Banner';
 
 const router = createRouter();
 

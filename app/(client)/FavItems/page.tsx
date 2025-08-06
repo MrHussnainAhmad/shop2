@@ -121,27 +121,12 @@ const handleClearAll = async () => {
                 <div className="relative aspect-square">
                   <Link href={`/product/${product.slug?.current}`}>
                     {product.images && product.images.length > 0 ? (
-                      <>
-                        {product.images[0]._type === 'image' && product.images[0].asset ? (
-                          <Image
-                            src={urlFor(product.images[0]).url()}
-                            alt={product.name || 'Product'}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : product.images[0]._type === 'imageUrl' && product.images[0].url ? (
-                          <Image
-                            src={product.images[0].url}
-                            alt={product.images[0].alt || product.name || 'Product'}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <ShoppingCart className="w-12 h-12 text-gray-400" />
-                          </div>
-                        )}
-                      </>
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name || 'Product'}
+                        fill
+                        className="object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <ShoppingCart className="w-12 h-12 text-gray-400" />

@@ -1,7 +1,7 @@
 import React from 'react';
 import Container from '@/components/common/Container';
 import DynamicBreadcrumb from '@/components/common/DynamicBreadcrumb';
-import { getAllProducts, getCategories, getAllBrands } from '@/sanity/queries';
+import { getAllProducts, getCategories, getAllBrands } from '@/lib/api';
 import ShopPageClient from '../../ShopPageClient';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';

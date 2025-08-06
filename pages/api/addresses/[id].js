@@ -1,9 +1,9 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
-import dbConnect from '../../../../lib/db';
-import Address from '../../../../models/Address';
-import UserProfile from '../../../../models/UserProfile';
+import dbConnect from '../../../lib/db';
+import Address from '../../../models/Address';
+import UserProfile from '../../../models/UserProfile';
 
 const router = createRouter();
 

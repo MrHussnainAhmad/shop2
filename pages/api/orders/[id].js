@@ -1,9 +1,8 @@
-
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
-import dbConnect from '../../../../lib/db';
-import Order from '../../../../models/Order';
-import UserProfile from '../../../../models/UserProfile';
+import dbConnect from '../../../lib/db';
+import Order from '../../../models/Order';
+import UserProfile from '../../../models/UserProfile';
 
 const router = createRouter();
 
@@ -54,6 +53,27 @@ router
       res.status(200).json(order);
     } catch (error) {
       res.status(500).json({ error: 'Failed to update order' });
+    }
+  })
+  .delete(async (req, res) => {
+    const { userId } = auth(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const user = await clerkClient.users.getUser(userId);
+    if (!user.privateMetadata.isAdmin) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    await dbConnect();
+    try {
+      const order = await Order.findByIdAndDelete(req.query.id);
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      res.status(200).json({ message: 'Order deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete order' });
     }
   });
 

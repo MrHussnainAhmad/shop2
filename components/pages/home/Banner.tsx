@@ -6,8 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { urlFor } from "@/sanity/lib/image";
-import { getBanner } from "@/sanity/queries";
+import { getBanner } from "@/lib/api";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,7 +47,7 @@ const Banner = async () => {
                 <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group">
                   {item?.image ? (
                     <Image
-                      src={urlFor(item.image).url()}
+                      src={item.image}
                       alt={item?.name || `Banner ${index + 1}`}
                       className={`object-cover w-full h-full transition-transform duration-300 ${
                         item?.link ? 'group-hover:scale-105' : ''

@@ -36,7 +36,7 @@ const HomeCategories = ({ categories }: Props) => {
               {category?.image ? (
                 <div className="w-12 h-12 md:w-16 md:h-16 overflow-hidden ">
                   <Image
-                    src={urlFor(category.image).url()}
+                    src={category.image}
                     alt={category?.name || "Category"}
                     width={64}
                     height={64}

@@ -45,7 +45,7 @@ const ComparePage = () => {
       const productSlugs = productsParam.split(',');
       const fetchProducts = async () => {
         const fetchedProducts = await Promise.all(
-          productSlugs.map(slug => getProductBySlugClient(slug.trim()))
+          productSlugs.map(slug => getProductBySlug(slug.trim()))
         );
         setProducts(fetchedProducts.filter((product): product is Product => product !== null));
       };
@@ -83,7 +83,7 @@ const ComparePage = () => {
     if (term.trim().length > 2) {
       setIsSearching(true);
       try {
-        const results = await searchProductsClient(term.trim());
+        const results = await searchProducts(term.trim());
         setSearchResults(results || []);
         setShowSearchResults(true);
       } catch (error) {

@@ -2,7 +2,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
 import multer from 'multer';
-import cloudinary from '../../lib/cloudinary';
+import cloudinary from '@/lib/cloudinary';
 
 const upload = multer({ dest: '/tmp' });
 

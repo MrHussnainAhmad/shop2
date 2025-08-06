@@ -2,7 +2,7 @@ import ProductGrid from "@/components/common/ProductGrid";
 import Banner from "@/components/pages/home/Banner";
 import HomeCategories from "@/components/pages/home/HomeCategories";
 import ShopbyBrands from "@/components/pages/home/ShopbyBrands";
-import { getCategories } from "@/sanity/queries";
+import { getCategories } from "@/lib/api";
 
 export default async function Home() {
   const categories = await getCategories();

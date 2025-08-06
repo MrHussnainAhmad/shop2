@@ -1,5 +1,5 @@
 import React from 'react';
-import { getDealProducts } from '@/sanity/queries';
+import { getDealProducts } from '@/lib/api';
 import { ProductCard } from '@/components/common/ProductCard';
 import DynamicBreadcrumb from '@/components/common/DynamicBreadcrumb';
 
