@@ -1,0 +1,10 @@
+Error: ./
+App Router and Pages Router both match path: /api/addresses
+Next.js does not support having both App Router and Pages Router routes matching the same path. Please remove one of the conflicting routes.
+
+
+    at Object.getCompilationErrors (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:749:55)
+    at DevBundlerService.getCompilationError (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/lib/dev-bundler-service.js:39:55)
+    at DevServer.getCompilationError (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/next-dev-server.js:686:42)
+    at DevServer.findPageComponents (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/next-dev-server.js:656:43)
+    at async DevServer.renderErrorToResponseImpl (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/base-server.js:2609:26)
