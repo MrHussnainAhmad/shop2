@@ -20,6 +20,7 @@ interface Address {
 
 const AddressesPage = () => {
   const { user } = useUser();
+  console.log("Client-side user object:", user);
   const modal = useAlertModal();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showForm, setShowForm] = useState(false);
