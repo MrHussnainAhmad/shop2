@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useAddressRefresh } from '@/contexts/AddressContext';
 
 export interface Address {
   _id?: string;
@@ -20,6 +21,15 @@ export const useCartAddresses = () => {
   const { user, isLoaded } = useUser();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Optional: use context for refresh trigger if available
+  let refreshTrigger = 0;
+  try {
+    const addressContext = useAddressRefresh();
+    refreshTrigger = addressContext.refreshTrigger;
+  } catch {
+    // Context not available, that's okay
+  }
 
   const fetchAddresses = async () => {
     // Only fetch if user is authenticated
@@ -63,7 +73,7 @@ export const useCartAddresses = () => {
     if (isLoaded) {
       fetchAddresses();
     }
-  }, [user?.id, isLoaded]);
+  }, [user?.id, isLoaded, refreshTrigger]);
 
   const getDefaultAddress = () => {
     return addresses.find(address => address.isDefault) || addresses[0] || null;

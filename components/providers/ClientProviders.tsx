@@ -3,6 +3,7 @@
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { AlertModalProvider } from '@/components/ui/alert-modal';
+import { AddressProvider } from '@/contexts/AddressContext';
 import Header from '@/components/header/Header';
 import Footer from '@/components/common/Footer';
 import { usePathname } from 'next/navigation';
@@ -18,18 +19,20 @@ export const ClientProviders: React.FC<ClientProvidersProps> = ({ children, webD
 
   return (
     <AlertModalProvider>
-      {!isAdminPath && <Header webData={webData} logo={webData?.logo} />}
-      {children}
-      {!isAdminPath && <Footer webData={webData} logo={webData?.logo} />}
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: "#000000",
-            color: "#00ff00",
-          },
-        }}
-      />
+      <AddressProvider>
+        {!isAdminPath && <Header webData={webData} logo={webData?.logo} />}
+        {children}
+        {!isAdminPath && <Footer webData={webData} logo={webData?.logo} />}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "#000000",
+              color: "#00ff00",
+            },
+          }}
+        />
+      </AddressProvider>
     </AlertModalProvider>
   );
 };

@@ -49,6 +49,13 @@ export async function PUT(request: NextRequest, { params }: { params: { addressI
       return NextResponse.json({ error: 'Address not found' }, { status: 404 });
     }
 
+    // If setting this address as default, unset all other addresses as default first
+    if (body.isDefault === true) {
+      userProfile.addresses.forEach(addr => {
+        addr.isDefault = false;
+      });
+    }
+    
     // Update the address fields
     Object.assign(address, body);
 

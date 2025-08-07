@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, MapPin, Check } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useAddressesByEmail } from "@/hooks/useAddressesByEmail";
 import toast from 'react-hot-toast';
+import { useAddressRefresh } from '@/contexts/AddressContext';
 
 interface Address {
   _id?: string;
@@ -23,11 +24,21 @@ const AddressesPage = () => {
   const { user } = useUser();
   const email = user?.emailAddresses?.[0]?.emailAddress || null;
   
+  // Optional: use context for triggering refresh in other components
+  let triggerRefresh: (() => void) | undefined;
+  try {
+    const addressContext = useAddressRefresh();
+    triggerRefresh = addressContext.triggerRefresh;
+  } catch {
+    // Context not available, that's okay
+  }
+  
   // Use our simple email-based hook
   const { 
     addresses, 
     loading, 
     error, 
+    fetchAddresses,
     createAddress, 
     updateAddress, 
     deleteAddress 
@@ -63,6 +74,8 @@ const AddressesPage = () => {
       setShowForm(false);
       setEditingAddress(null);
       resetForm();
+      // Trigger refresh in other components that use addresses
+      triggerRefresh?.();
     } catch (error) {
       toast.error('Failed to save address. Please try again.');
     }
@@ -73,6 +86,8 @@ const AddressesPage = () => {
       try {
         await deleteAddress(addressId);
         toast.success('Address deleted successfully!');
+        // Trigger refresh in other components that use addresses
+        triggerRefresh?.();
       } catch (error) {
         toast.error('Failed to delete address. Please try again.');
       }
@@ -80,16 +95,29 @@ const AddressesPage = () => {
   };
 
   const handleSetDefault = async (addressId: string) => {
-    // For now, just update the address to set isDefault: true
-    // You can implement set-default logic later if needed
     try {
-      const addressToUpdate = addresses.find(addr => addr._id === addressId);
-      if (addressToUpdate) {
-        await updateAddress(addressId, { ...addressToUpdate, isDefault: true });
-        toast.success('Default address updated!');
+      // Call the dedicated set-default API
+      const response = await fetch('/api/addresses/set-default', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ addressId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to set default address');
       }
+
+      // Refresh addresses to show updated default status
+      await fetchAddresses();
+      // Trigger refresh in other components that use addresses
+      triggerRefresh?.();
+      toast.success('Default address updated!');
     } catch (error) {
-      toast.error('Failed to set default address.');
+      console.error('Error setting default address:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to set default address.');
     }
   };
 
