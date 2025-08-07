@@ -27,9 +27,18 @@ export const useAddresses = () => {
       setLoading(true);
       setError(null);
       
-      const clerkUserId = user?.id;
-      if (!clerkUserId) {
-        console.error('No Clerk user ID found');
+      // Check if user is authenticated
+      if (!user?.id) {
+        console.log('No authenticated user found');
+        setAddresses([]);
+        setLoading(false);
+        return;
+      }
+
+      const email = user?.emailAddresses?.[0]?.emailAddress;
+      if (!email) {
+        console.log('No user email found');
+        setAddresses([]);
         setLoading(false);
         return;
       }
@@ -38,8 +47,13 @@ export const useAddresses = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetch(`/api/addresses?clerkId=${clerkUserId}`, {
-        signal: controller.signal
+      // Use the main addresses API which handles authentication internally
+      const response = await fetch('/api/addresses', {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       clearTimeout(timeoutId);
@@ -47,18 +61,38 @@ export const useAddresses = () => {
       if (response.ok) {
         const result = await response.json();
         setAddresses(result || []);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to fetch addresses');
-        console.error('Failed to fetch addresses:', errorData);
-        // Set empty array as fallback
+      } else if (response.status === 404) {
+        // User not found is not an error, just means no addresses yet
+        console.log('User profile not found, setting empty addresses');
         setAddresses([]);
+      } else {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || 'Failed to fetch addresses' };
+        }
+        
+        // Don't treat user not found as an error
+        if (errorData.error === 'User not found') {
+          console.log('User profile not found, this is normal for first-time users');
+          setAddresses([]);
+        } else {
+          setError(errorData.error || 'Failed to fetch addresses');
+          console.error('Failed to fetch addresses:', errorData);
+          setAddresses([]);
+        }
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setError(errorMessage);
-      console.error("Error fetching addresses:", error);
-      // Set empty array as fallback
+      if (error.name === 'AbortError') {
+        console.log('Address fetch request was aborted');
+        setError('Request timeout');
+      } else {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setError(errorMessage);
+        console.error("Error fetching addresses:", error);
+      }
       setAddresses([]);
     } finally {
       setLoading(false);
@@ -66,10 +100,15 @@ export const useAddresses = () => {
   };
 
   useEffect(() => {
-    if (user?.emailAddresses?.[0]?.emailAddress) {
+    if (user?.id) {
       fetchAddresses();
+    } else {
+      // Clear addresses if user is not authenticated
+      setAddresses([]);
+      setLoading(false);
+      setError(null);
     }
-  }, [user]);
+  }, [user?.id]);
 
   const getDefaultAddress = () => {
     return addresses.find(address => address.isDefault) || addresses[0] || null;

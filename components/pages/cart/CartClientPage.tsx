@@ -4,7 +4,7 @@ import { Trash2, Plus, Minus, ShoppingBag, Truck, Shield, CreditCard, Tag, Perce
 import useCartStore from '@/store'
 import { useUser } from '@clerk/nextjs'
 import Image from 'next/image'
-import { useAddresses } from '@/hooks/useAddresses'
+import { useCartAddresses } from '@/hooks/useCartAddresses'
 import { useAlertModal } from '@/components/ui/alert-modal'
 
 const CartClientPage = () => {
@@ -26,7 +26,7 @@ const {
     getAppliedCoupons
   } = useCartStore()
   
-  const { getDefaultAddress } = useAddresses();
+  const { getDefaultAddress, isAuthenticated, hasAddresses } = useCartAddresses();
   const defaultAddress = getDefaultAddress();
   
   const [couponCode, setCouponCode] = useState('')
@@ -541,38 +541,56 @@ modal.alert(result.message)
               </div>
 
               {/* Default Delivery Address */}
-              {defaultAddress ? (
-                <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Delivery Address
-                  </h4>
-                  <div className="text-sm text-gray-600 space-y-1 mb-3">
-                    <p className="font-medium text-gray-900">{defaultAddress.name}</p>
-                    <p>{defaultAddress.streetAddress}</p>
-                    {defaultAddress.apartment && <p>{defaultAddress.apartment}</p>}
-                    <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.postalCode}</p>
-                    <p>{defaultAddress.country}</p>
-                    <p>{defaultAddress.phone}</p>
+              {isAuthenticated ? (
+                defaultAddress ? (
+                  <div className="mb-6">
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Delivery Address
+                    </h4>
+                    <div className="text-sm text-gray-600 space-y-1 mb-3">
+                      <p className="font-medium text-gray-900">{defaultAddress.name}</p>
+                      <p>{defaultAddress.streetAddress}</p>
+                      {defaultAddress.apartment && <p>{defaultAddress.apartment}</p>}
+                      <p>{defaultAddress.city}, {defaultAddress.state} {defaultAddress.postalCode}</p>
+                      <p>{defaultAddress.country}</p>
+                      <p>{defaultAddress.phone}</p>
+                    </div>
+                    <a 
+                      href="/account/addresses" 
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
+                    >
+                      Change Address
+                    </a>
                   </div>
-                  <a 
-                    href="/account/addresses" 
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
-                  >
-                    Change Address
-                  </a>
-                </div>
+                ) : (
+                  <div className="mb-6">
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Delivery Address
+                    </h4>
+                    <a 
+                      href="/account/addresses" 
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
+                    >
+                      Add Address
+                    </a>
+                  </div>
+                )
               ) : (
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
                     Delivery Address
                   </h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Sign in to save delivery addresses
+                  </p>
                   <a 
-                    href="/account/addresses" 
+                    href="/sign-in" 
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors inline-flex items-center gap-1"
                   >
-                    Add Address
+                    Sign In
                   </a>
                 </div>
               )}
