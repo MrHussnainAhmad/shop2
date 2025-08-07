@@ -54,15 +54,33 @@ export default async function handler(req, res) {
   const { id } = evt.data
   const eventType = evt.type
 
+  console.log('Clerk Webhook Event:', eventType, evt.data);
+
   if (eventType === 'user.created') {
     await dbConnect()
-    const { email_addresses, first_name, last_name } = evt.data
-    await UserProfile.create({
-      clerkId: id,
-      email: email_addresses[0].email_address,
-      firstName: first_name,
-      lastName: last_name,
-    })
+    const { id, email_addresses, first_name, last_name } = evt.data
+    console.log('Creating UserProfile for:', { clerkId: id, email: email_addresses[0].email_address, firstName: first_name, lastName: last_name });
+    try {
+      await UserProfile.create({
+        clerkId: id,
+        email: email_addresses[0].email_address,
+        firstName: first_name,
+        lastName: last_name,
+      })
+      console.log('UserProfile created successfully for Clerk ID:', id);
+    } catch (error) {
+      console.error('Error creating UserProfile for Clerk ID:', id, error);
+    }
+  } else if (eventType === 'user.deleted') {
+    await dbConnect();
+    const { id } = evt.data;
+    console.log('Deleting UserProfile for Clerk ID:', id);
+    try {
+      await UserProfile.deleteOne({ clerkId: id });
+      console.log('UserProfile deleted successfully for Clerk ID:', id);
+    } catch (error) {
+      console.error('Error deleting UserProfile for Clerk ID:', id, error);
+    }
   }
 
   return res.status(200).json({ response: 'Success' })
