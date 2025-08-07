@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Plus, Edit2, Trash2, MapPin, Check } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import { useAlertModal } from "@/components/ui/alert-modal";
+import { useAddressesByEmail } from "@/hooks/useAddressesByEmail";
+import toast from 'react-hot-toast';
 
 interface Address {
   _id?: string;
@@ -20,13 +21,22 @@ interface Address {
 
 const AddressesPage = () => {
   const { user } = useUser();
-  const modal = useAlertModal();
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const email = user?.emailAddresses?.[0]?.emailAddress || null;
+  
+  // Use our simple email-based hook
+  const { 
+    addresses, 
+    loading, 
+    error, 
+    createAddress, 
+    updateAddress, 
+    deleteAddress 
+  } = useAddressesByEmail(email);
+  
   const [showForm, setShowForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<Address>({
-    email: user?.emailAddresses?.[0]?.emailAddress || "",
+    email: email || "",
     name: "",
     streetAddress: "",
     apartment: "",
@@ -38,125 +48,48 @@ const AddressesPage = () => {
     isDefault: false,
   });
 
-  // Fetch addresses from MongoDB
-  useEffect(() => {
-    if (user?.emailAddresses?.[0]?.emailAddress) {
-      fetchAddresses();
-    }
-  }, [user]);
-
-  const fetchAddresses = async () => {
-    try {
-      const clerkUserId = user?.id;
-      if (!clerkUserId) {
-        console.error('No Clerk user ID found');
-        setLoading(false);
-        return;
-      }
-      
-      const response = await fetch(`/api/addresses?clerkId=${clerkUserId}`);
-      if (response.ok) {
-        const result = await response.json();
-        setAddresses(result);
-      } else {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          console.error('Failed to fetch addresses:', errorData);
-        } else {
-          const errorText = await response.text();
-          console.error('Failed to fetch addresses (non-JSON response):', errorText);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching addresses:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     try {
-      const method = editingAddress?._id ? 'PUT' : 'POST';
-      const addressData = {
-        ...formData,
-        email: user?.emailAddresses?.[0]?.emailAddress,
-      };
-      
       if (editingAddress?._id) {
-        addressData._id = editingAddress._id;
+        await updateAddress(editingAddress._id, formData);
+        toast.success('Address updated successfully!');
+      } else {
+        await createAddress(formData);
+        toast.success('Address created successfully!');
       }
-
-      const response = await fetch(editingAddress?._id ? `/api/addresses/${editingAddress._id}` : '/api/addresses', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(addressData),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save address');
-      }
-
-      await fetchAddresses();
+      
       setShowForm(false);
       setEditingAddress(null);
       resetForm();
     } catch (error) {
-      console.error("Error saving address:", error);
-      modal.alert("Error saving address. Please try again.");
-    } finally {
-      setLoading(false);
+      toast.error('Failed to save address. Please try again.');
     }
   };
 
-  const handleDelete = async (addressId: string) => {
-    const confirmed = await modal.confirm("Are you sure you want to delete this address?");
-    if (confirmed) {
+  const handleDeleteAddress = async (addressId: string) => {
+    if (confirm('Are you sure you want to delete this address?')) {
       try {
-        const response = await fetch(`/api/addresses/${addressId}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to delete address');
-        }
-
-        await fetchAddresses();
+        await deleteAddress(addressId);
+        toast.success('Address deleted successfully!');
       } catch (error) {
-        console.error("Error deleting address:", error);
-        modal.alert("Error deleting address. Please try again.");
+        toast.error('Failed to delete address. Please try again.');
       }
     }
   };
 
   const handleSetDefault = async (addressId: string) => {
+    // For now, just update the address to set isDefault: true
+    // You can implement set-default logic later if needed
     try {
-      const response = await fetch('/api/addresses/set-default', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          addressId
-        }),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to set default address');
+      const addressToUpdate = addresses.find(addr => addr._id === addressId);
+      if (addressToUpdate) {
+        await updateAddress(addressId, { ...addressToUpdate, isDefault: true });
+        toast.success('Default address updated!');
       }
-      
-      await fetchAddresses();
     } catch (error) {
-      console.error("Error setting default address:", error);
-      modal.alert("Error setting default address. Please try again.");
+      toast.error('Failed to set default address.');
     }
   };
 
@@ -255,7 +188,7 @@ const AddressesPage = () => {
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(address._id!)}
+                        onClick={() => handleDeleteAddress(address._id!)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />

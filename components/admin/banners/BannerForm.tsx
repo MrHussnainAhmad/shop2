@@ -59,7 +59,7 @@ const BannerForm: React.FC<BannerFormProps> = ({ initialData, onSuccess }) => {
         const uploadFormData = new FormData();
         uploadFormData.append('image', file);
 
-        const response = await fetch('/api/upload/image', {
+        const response = await fetch('/api/upload/simple', {
           method: 'POST',
           body: uploadFormData,
         });
