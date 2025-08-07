@@ -19,10 +19,13 @@ export async function GET(request: NextRequest) {
         contactInfo: {},
         logo: '/Logo.png',
         storeName: 'My Awesome Store',
+        sectionSettings: {
+          shopByBrandsVisible: true,
+        },
       });
     }
 
-    return NextResponse.json({ data: webData });
+    return NextResponse.json(webData);
   } catch (error) {
     console.error('Error fetching web data:', error);
     return NextResponse.json({ error: 'Failed to fetch web data' }, { status: 500 });
@@ -44,7 +47,22 @@ export async function POST(request: NextRequest) {
       webData = await WebData.findOneAndUpdate({}, updateData, { new: true, upsert: true });
     }
 
-    return NextResponse.json({ data: webData });
+    return NextResponse.json(webData);
+  } catch (error) {
+    console.error('Error updating web data:', error);
+    return NextResponse.json({ error: 'Failed to update web data' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  await dbConnect();
+  try {
+    const body = await request.json();
+    
+    // Find and update the WebData document
+    let webData = await WebData.findOneAndUpdate({}, body, { new: true, upsert: true });
+    
+    return NextResponse.json(webData);
   } catch (error) {
     console.error('Error updating web data:', error);
     return NextResponse.json({ error: 'Failed to update web data' }, { status: 500 });

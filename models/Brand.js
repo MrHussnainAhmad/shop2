@@ -9,6 +9,10 @@ const BrandSchema = new mongoose.Schema({
   description: { type: String },
   website: { type: String },
   featured: { type: Boolean, default: false },
+  voucher: {
+    name: { type: String },
+    value: { type: Number }, // Percentage discount
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

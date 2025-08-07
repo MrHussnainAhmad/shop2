@@ -48,6 +48,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSuccess }) => 
     }
   };
 
+  const handleCouponChange = (field: string, value: string | number) => {
+    setFormData({
+      ...formData,
+      coupon: {
+        ...formData.coupon,
+        [field]: value,
+      },
+    });
+  };
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
@@ -256,6 +266,46 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSuccess }) => 
           <input type="number" id="dealPercentage" name="dealPercentage" value={formData.dealPercentage || 0} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
       )}
+      
+      {/* Coupon Section */}
+      <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Product Coupon</h3>
+        <p className="text-sm text-gray-600 mb-4">Add a coupon code that customers can use for this specific product. Leave empty if no coupon is available.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="couponName" className="block text-sm font-medium text-gray-700 mb-1">Coupon Name/Code</label>
+            <input 
+              type="text" 
+              id="couponName" 
+              placeholder="e.g., SUMMER20" 
+              value={formData.coupon?.name || ''} 
+              onChange={(e) => handleCouponChange('name', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+            />
+          </div>
+          <div>
+            <label htmlFor="couponValue" className="block text-sm font-medium text-gray-700 mb-1">Discount Percentage (%)</label>
+            <input 
+              type="number" 
+              id="couponValue" 
+              min="0" 
+              max="100" 
+              placeholder="e.g., 20" 
+              value={formData.coupon?.value || ''} 
+              onChange={(e) => handleCouponChange('value', parseInt(e.target.value) || 0)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+            />
+          </div>
+        </div>
+        {formData.coupon?.name && formData.coupon?.value && (
+          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-sm text-green-800">
+              <strong>Preview:</strong> Customers can use coupon "{formData.coupon.name}" to get {formData.coupon.value}% off this product.
+            </p>
+          </div>
+        )}
+      </div>
+      
       <button type="submit" disabled={loading} className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed">
         {loading ? 'Saving...' : initialData ? 'Update Product' : 'Add Product'}
       </button>

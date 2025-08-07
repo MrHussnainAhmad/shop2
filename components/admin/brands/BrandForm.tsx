@@ -32,6 +32,16 @@ const BrandForm: React.FC<BrandFormProps> = ({ initialData, onSuccess }) => {
     }
   };
 
+  const handleVoucherChange = (field: string, value: string | number) => {
+    setFormData({
+      ...formData,
+      voucher: {
+        ...formData.voucher,
+        [field]: value,
+      },
+    });
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setLoading(true);
@@ -128,6 +138,46 @@ const BrandForm: React.FC<BrandFormProps> = ({ initialData, onSuccess }) => {
         <input type="checkbox" id="featured" name="featured" checked={formData.featured || false} onChange={handleChange} className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
         <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">Featured Brand</label>
       </div>
+
+      {/* Voucher Section */}
+      <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Brand Voucher</h3>
+        <p className="text-sm text-gray-600 mb-4">Add a voucher code that customers can use for all products from this brand. Leave empty if no voucher is available.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="voucherName" className="block text-sm font-medium text-gray-700 mb-1">Voucher Name/Code</label>
+            <input 
+              type="text" 
+              id="voucherName" 
+              placeholder="e.g., SPRING25" 
+              value={formData.voucher?.name || ''} 
+              onChange={(e) => handleVoucherChange('name', e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+            />
+          </div>
+          <div>
+            <label htmlFor="voucherValue" className="block text-sm font-medium text-gray-700 mb-1">Discount Percentage (%)</label>
+            <input 
+              type="number" 
+              id="voucherValue" 
+              min="0" 
+              max="100" 
+              placeholder="e.g., 25" 
+              value={formData.voucher?.value || ''} 
+              onChange={(e) => handleVoucherChange('value', parseInt(e.target.value) || 0)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+            />
+          </div>
+        </div>
+        {formData.voucher?.name && formData.voucher?.value && (
+          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              <strong>Preview:</strong> Customers can use voucher "{formData.voucher.name}" to get {formData.voucher.value}% off any product from this brand.
+            </p>
+          </div>
+        )}
+      </div>
+
       <button type="submit" disabled={loading} className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed">
         {loading ? 'Saving...' : initialData ? 'Update Brand' : 'Add Brand'}
       </button>

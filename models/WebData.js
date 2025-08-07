@@ -21,6 +21,9 @@ const WebDataSchema = new mongoose.Schema({
   },
   logo: { type: String, default: '' },
   storeName: { type: String, default: '' },
+  sectionSettings: {
+    shopByBrandsVisible: { type: Boolean, default: true },
+  },
 }, { timestamps: true });
 
 const WebData = mongoose.models.WebData || mongoose.model('WebData', WebDataSchema);

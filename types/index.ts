@@ -21,6 +21,10 @@ export interface Product {
     value: string;
   }>;
   tags?: string[];
+  coupon?: {
+    name: string;
+    value: number;
+  };
   couponCode?: {
     code: string;
     discount: number;
@@ -56,6 +60,10 @@ export interface Brand {
   logo?: string; // Direct URL from Cloudinary
   imageUrl?: string; // Alternative field for logo URL
   featured?: boolean;
+  voucher?: {
+    name: string;
+    value: number;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

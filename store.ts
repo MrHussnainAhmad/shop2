@@ -13,7 +13,7 @@ interface CartItem {
 
 interface StoreState {
   items: CartItem[];
-  appliedVoucher: { code: string; discount: number } | null;
+  appliedVoucher: { code: string; discount: number; brandName?: string } | null;
   addItem: (product: Product) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -24,7 +24,7 @@ interface StoreState {
   applyCouponToItem: (productId: string, couponCode: string) => { success: boolean; message: string; discount?: number };
   removeCouponFromItem: (productId: string) => void;
   getItemPrice: (item: CartItem) => number;
-  applyVoucher: (voucherCode: string) => { success: boolean; message: string };
+  applyVoucher: (voucherCode: string) => Promise<{ success: boolean; message: string }>;
   removeVoucher: () => void;
   getAppliedCoupons: () => { code: string; discount: number; productId: string; productName: string }[];
 }
@@ -140,12 +140,12 @@ const useCartStore = create<StoreState>()(  persist(
         }
         
         // Check if product has a coupon code
-        if (!item.product.couponCode?.code || !item.product.couponCode?.discount) {
+        if (!item.product.coupon?.name || !item.product.coupon?.value) {
           return { success: false, message: "This product doesn't have any coupon codes available" };
         }
         
         // Check if coupon code matches
-        if (item.product.couponCode.code.toUpperCase() !== couponCode.toUpperCase()) {
+        if (item.product.coupon.name.toUpperCase() !== couponCode.toUpperCase()) {
           return { success: false, message: "Invalid coupon code for this product" };
         }
         
@@ -162,7 +162,7 @@ const useCartStore = create<StoreState>()(  persist(
                   ...cartItem, 
                   appliedCoupon: {
                     code: couponCode.toUpperCase(),
-                    discount: item.product.couponCode.discount
+                    discount: item.product.coupon.value
                   }
                 }
               : cartItem
@@ -171,8 +171,8 @@ const useCartStore = create<StoreState>()(  persist(
         
         return { 
           success: true, 
-          message: `Coupon ${couponCode.toUpperCase()} applied! Additional ${item.product.couponCode.discount}% discount added`,
-          discount: item.product.couponCode.discount
+          message: `Coupon ${couponCode.toUpperCase()} applied! Additional ${item.product.coupon.value}% discount added`,
+          discount: item.product.coupon.value
         };
       },
       
@@ -196,7 +196,7 @@ const useCartStore = create<StoreState>()(  persist(
         return item ? item.quantity : 0;
       },
       
-      applyVoucher: (voucherCode: string) => {
+      applyVoucher: async (voucherCode: string) => {
         const items = get().items;
         
         // Check if cart has only deal products
@@ -205,25 +205,40 @@ const useCartStore = create<StoreState>()(  persist(
           return { success: false, message: 'Voucher codes cannot be applied to deal products only' };
         }
         
-        // Mock voucher validation - in real app, this would validate against backend
-        const validVouchers = {
-          'SAVE10': 10,
-          'SAVE20': 20,
-          'WELCOME': 15
-        };
-        
-        const discount = validVouchers[voucherCode.toUpperCase() as keyof typeof validVouchers];
-        
-        if (!discount) {
-          return { success: false, message: 'Invalid voucher code' };
+        try {
+          // Fetch vouchers from API
+          const response = await fetch('/api/vouchers');
+          if (!response.ok) {
+            throw new Error('Failed to fetch vouchers');
+          }
+          const validVouchers = await response.json();
+          
+          const voucherInfo = validVouchers[voucherCode.toUpperCase()];
+          
+          if (!voucherInfo) {
+            return { success: false, message: 'Invalid voucher code' };
+          }
+          
+          if (get().appliedVoucher?.code === voucherCode.toUpperCase()) {
+            return { success: false, message: 'Voucher already applied' };
+          }
+          
+          set({ 
+            appliedVoucher: { 
+              code: voucherCode.toUpperCase(), 
+              discount: voucherInfo.discount,
+              brandName: voucherInfo.brandName
+            } 
+          });
+          
+          return { 
+            success: true, 
+            message: `Voucher applied! ${voucherInfo.discount}% discount from ${voucherInfo.brandName} on eligible items (excludes deal products)` 
+          };
+        } catch (error) {
+          console.error('Error applying voucher:', error);
+          return { success: false, message: 'Failed to apply voucher. Please try again.' };
         }
-        
-        if (get().appliedVoucher?.code === voucherCode.toUpperCase()) {
-          return { success: false, message: 'Voucher already applied' };
-        }
-        
-        set({ appliedVoucher: { code: voucherCode.toUpperCase(), discount } });
-        return { success: true, message: `Voucher applied! ${discount}% discount on eligible items (excludes deal products)` };
       },
       
       removeVoucher: () => {

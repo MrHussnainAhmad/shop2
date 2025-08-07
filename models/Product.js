@@ -20,9 +20,9 @@ const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     value: { type: String, required: true },
   }],
-  couponCode: {
-    code: { type: String },
-    discount: { type: Number },
+  coupon: {
+    name: { type: String },
+    value: { type: Number }, // Percentage discount
   },
   isOnDeal: { type: Boolean, default: false },
   dealPercentage: { type: Number },

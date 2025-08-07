@@ -36,19 +36,9 @@ const {
   // Get applied coupons from store instead of local state
   const appliedCoupons = getAppliedCoupons()
 
-  // Check if user is logged in
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-6 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-semibold mb-4">Please sign in to view your cart</h2>
-            <p className="text-gray-600">You need to be logged in to access your shopping cart.</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Note: User authentication is handled by the cart store persistence
+  // Cart items are saved in localStorage and don't require authentication to view
+  // However, checkout process will require authentication
 
   // Check if cart is empty
   if (items.length === 0) {
@@ -144,13 +134,13 @@ modal.alert(messages[0] || 'Invalid coupon code')
     }
   }
 
-  const handleApplyVoucher = () => {
+  const handleApplyVoucher = async () => {
     if (!voucherCode) {
 modal.alert('Please enter a voucher code.')
       return;
     }
     
-    const result = applyVoucher(voucherCode);
+    const result = await applyVoucher(voucherCode);
 modal.alert(result.message)
     
     if (result.success) {
