@@ -16,25 +16,29 @@ export const getCategories = async () => {
 
 export const getBanner = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/banners`);
+    const response = await fetch(`${BASE_URL}/api/banners/simple`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const banners = await response.json();
-    return banners;
+    const allBanners = await response.json();
+    // Filter to get only main banners (not mini banners)
+    const mainBanners = allBanners.filter((banner: any) => !banner.isMiniBanner);
+    return mainBanners;
   } catch (error) {
-    console.error("Error fetching banners:", error);
+    console.error("Error fetching main banners:", error);
     return [];
   }
 };
 
 export const getMiniBanner = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/api/banners?isMiniBanner=true`);
+    const response = await fetch(`${BASE_URL}/api/banners/simple`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const miniBanners = await response.json();
+    const allBanners = await response.json();
+    // Filter to get only mini banners
+    const miniBanners = allBanners.filter((banner: any) => banner.isMiniBanner === true);
     return miniBanners;
   } catch (error) {
     console.error("Error fetching mini banners:", error);
