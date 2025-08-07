@@ -38,7 +38,7 @@ const AddressesPage = () => {
     isDefault: false,
   });
 
-  // Fetch addresses from Sanity
+  // Fetch addresses from MongoDB
   useEffect(() => {
     if (user?.emailAddresses?.[0]?.emailAddress) {
       fetchAddresses();
@@ -54,7 +54,7 @@ const AddressesPage = () => {
         return;
       }
       
-      const response = await fetch(`/api/addresses`);
+      const response = await fetch(`/api/addresses?email=${userEmail}`);
       if (response.ok) {
         const result = await response.json();
         setAddresses(result);

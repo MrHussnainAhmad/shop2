@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { searchProducts } from "@/lib/api";
-import { Product } from "@/sanity.types";
+import { Product } from "@/types";
 
 const Comparison = () => {
     const [searchOne, setSearchOne] = React.useState("");

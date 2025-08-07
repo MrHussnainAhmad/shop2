@@ -1,7 +1,8 @@
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 export const getCategories = async () => {
   try {
-    const response = await fetch('/api/categories');
+    const response = await fetch(`${BASE_URL}/api/categories`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -15,7 +16,7 @@ export const getCategories = async () => {
 
 export const getBanner = async () => {
   try {
-    const response = await fetch('/api/banners');
+    const response = await fetch(`${BASE_URL}/api/banners`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -29,7 +30,7 @@ export const getBanner = async () => {
 
 export const getMiniBanner = async () => {
   try {
-    const response = await fetch('/api/banners?isMiniBanner=true');
+    const response = await fetch(`${BASE_URL}/api/banners?isMiniBanner=true`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -43,7 +44,7 @@ export const getMiniBanner = async () => {
 
 export const getFeaturedProducts = async () => {
   try {
-    const response = await fetch('/api/products?isFeatured=true');
+    const response = await fetch(`${BASE_URL}/api/products?isFeatured=true`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -57,7 +58,7 @@ export const getFeaturedProducts = async () => {
 
 export const getAllBrands = async () => {
   try {
-    const response = await fetch('/api/brands');
+    const response = await fetch(`${BASE_URL}/api/brands`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -71,7 +72,7 @@ export const getAllBrands = async () => {
 
 export const getProductBySlug = async (slug: string) => {
   try {
-    const response = await fetch(`/api/products/${slug}`);
+    const response = await fetch(`${BASE_URL}/api/products/${slug}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -85,7 +86,7 @@ export const getProductBySlug = async (slug: string) => {
 
 export const searchProducts = async (searchTerm: string) => {
   try {
-    const response = await fetch(`/api/products/search?term=${encodeURIComponent(searchTerm)}`);
+    const response = await fetch(`${BASE_URL}/api/products/search?term=${encodeURIComponent(searchTerm)}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -99,7 +100,7 @@ export const searchProducts = async (searchTerm: string) => {
 
 export const getAllProductsDebug = async () => {
   try {
-    const response = await fetch('/api/products?debug=true');
+    const response = await fetch(`${BASE_URL}/api/products?debug=true`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -113,7 +114,7 @@ export const getAllProductsDebug = async () => {
 
 export const getAllProducts = async () => {
   try {
-    const response = await fetch('/api/products');
+    const response = await fetch(`${BASE_URL}/api/products`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -127,7 +128,7 @@ export const getAllProducts = async () => {
 
 export const getDealProducts = async () => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products?isOnDeal=true`);
+    const response = await fetch(`${BASE_URL}/api/products?isOnDeal=true`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -136,5 +137,25 @@ export const getDealProducts = async () => {
   } catch (error) {
     console.error("Error fetching deal products:", error);
     return [];
+  }
+};
+
+export const getWebData = async () => {
+  try {
+    console.log("Fetching web data from /api/webdata...");
+    const response = await fetch(`${BASE_URL}/api/webdata`);
+    console.log("Web data API response status:", response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const jsonResponse = await response.json();
+    console.log("Web data API JSON response:", jsonResponse);
+    const { data } = jsonResponse;
+    return data;
+  } catch (error) {
+    console.error("Error fetching web data:", error);
+    return null;
   }
 };

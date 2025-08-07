@@ -5,8 +5,7 @@ import React from 'react'
 import { getAllBrands } from '@/lib/api'
 import { GitCompareArrows, Headset, ShieldCheck, Truck } from 'lucide-react'
 import Image from 'next/image'
-import { Brand } from '@/sanity.types'
-import { urlFor } from '@/sanity/lib/image'
+import { Brand } from '@/types'
 
 const extraData = [
     {
@@ -50,15 +49,24 @@ const ShopbyBrands = async () => {
             href={`/shop/brand/${brand.slug?.current}`}
 className="p-4 border border-gray-300 rounded-md hover:bg-gray-50 hover:border-red-500 hover:shadow-md w-36 h-24 flex items-center justify-center overflow-hidden hoverEffect transition-all duration-300"
           >
-            {brand?.logo && (
+            {brand?.logo && typeof brand.logo === 'string' && brand.logo.startsWith('http') ? (
               <Image
-                src={brand?.logo}
+                src={brand.logo}
+                className="w-32 h-32 object-contain"
+                alt="brand"
+                width={250}
+                height={250}
+              />
+            ) : (
+              <Image
+                src="/placeholder-brand.svg"
                 className="w-32 h-32 object-contain"
                 alt="brand"
                 width={250}
                 height={250}
               />
             )}
+            {console.log("ShopbyBrands image src:", brand.logo)}
           </Link>
         ))}
       </div>

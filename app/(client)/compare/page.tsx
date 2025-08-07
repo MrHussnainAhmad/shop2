@@ -4,8 +4,8 @@ import React from "react";
 import Container from "@/components/common/Container";
 import DynamicBreadcrumb from "@/components/common/DynamicBreadcrumb";
 import Link from "next/link";
-import { getProductBySlugClient, searchProductsClient } from "../../../sanity/queries/client";
-import { Product } from "@/sanity.types";
+import { getProductBySlug, searchProducts } from "@/lib/api";
+import { Product } from "@/types";
 import AddToCart from "@/components/common/AddToCart";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
@@ -261,10 +261,9 @@ const ComparePage = () => {
 
 // Helper functions
 const getImageUrl = (image: any): string => {
-  if (image._type === 'image') {
-    return `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/${process.env.NEXT_PUBLIC_SANITY_DATASET}/${image.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`;
-  } else if (image._type === 'imageUrl' && image.url) {
-    return image.url;
+  // Since images are now direct URLs from Cloudinary
+  if (typeof image === 'string') {
+    return image;
   }
   return '/placeholder-product.jpg';
 };

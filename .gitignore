@@ -136,3 +136,4 @@ temp/
 *.cert
 *.pem
 
+.aider*

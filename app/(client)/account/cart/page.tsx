@@ -61,7 +61,7 @@ const AccountCartPage = () => {
                 <div className="w-16 h-16 relative flex-shrink-0">
                   {item.product.images && item.product.images.length > 0 && (
                     <Image
-                      src={item.product.images[0]}
+                      src={item.product.images[0] || "/placeholder-product.svg"}
                       alt={item.product.name || 'Product'}
                       fill
                       className="object-cover rounded-lg"
@@ -120,7 +120,7 @@ const AccountCartPage = () => {
                 <div className="w-16 h-16 relative flex-shrink-0">
                   {item.product.images && item.product.images.length > 0 && (
                     <Image
-                      src={item.product.images[0]}
+                      src={item.product.images[0] || "/placeholder-product.svg"}
                       alt={item.product.name || 'Product'}
                       fill
                       className="object-cover rounded-lg"

@@ -1,7 +1,6 @@
 "use client";
 
-import { FEATURED_PRODUTSResult } from "@/sanity.types";
-import { image } from "@/sanity/image";
+import { FEATURED_PRODUCTSResult } from "@/types";
 import Link from "next/link";
 import React, { useState } from "react";
 import AddToCart from "./AddToCart";
@@ -102,10 +101,10 @@ const ProductCard = ({ product, ...directProps }: ProductCardProps) => {
   // Manage quantity controls visibility
   const [quantityControlsVisible, setQuantityControlsVisible] = useState(false);
 
-  // Get image URL handling both Sanity images and URL images
+  // Get image URL from Cloudinary
   const getImageUrl = () => {
     if (productData?.images && productData.images.length > 0) {
-      // Assuming images are now direct URLs from Cloudinary
+      // Images are direct URLs from Cloudinary
       return productData.images[0];
     }
     return null;

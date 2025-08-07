@@ -3,7 +3,6 @@ import React from "react";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { urlFor } from "@/sanity/lib/image";
 import useWishlistStore from "@/store/wishlistStore";
 import useCartStore from "@/store";
 import toast from "react-hot-toast";
@@ -122,7 +121,7 @@ const handleClearAll = async () => {
                   <Link href={`/product/${product.slug?.current}`}>
                     {product.images && product.images.length > 0 ? (
                       <Image
-                        src={product.images[0]}
+                        src={product.images[0] || "/placeholder-product.svg"}
                         alt={product.name || 'Product'}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-300"

@@ -10,7 +10,12 @@ import { Category } from '@/models/Category';
 
 const date = new Date();
 
-const Footer = () => {
+interface FooterProps {
+  webData: any; // Define a proper type for WebData if available
+  logo: string; // New logo prop
+}
+
+const Footer: React.FC<FooterProps> = ({ webData, logo }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,43 +42,52 @@ const Footer = () => {
         <div className="py-12 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           <div className="col-span-1">
             <div className="mb-4">
-              <Logo />
+              <Logo headerLogo={logo} />
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              Discover curated furniture collections at Logo, blending style and
-              comfort to elevate your living spaces.
+              {webData?.aboutUs || "Discover curated furniture collections at Logo, blending style and comfort to elevate your living spaces."}
             </p>
             <div className="flex gap-3">
-              <Link
-                href="#"
-                className="text-gray-600 hover:text-red-500 transition-colors"
-              >
-                <Youtube size={20} />
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-600 hover:text-red-500 transition-colors"
-              >
-                <Github size={20} />
-              </Link>
-              <Link
-                href="#"
-                className="text-600 hover:text-red-500 transition-colors"
-              >
-                <Linkedin size={20} />
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-600 hover:text-red-500 transition-colors"
-              >
-                <Facebook size={20} />
-              </Link>
-              <Link
-                href="#"
-                className="text-gray-600 hover:text-red-500 transition-colors"
-              >
-                <Slack size={20} />
-              </Link>
+              {webData?.socialLinks?.youtube && (
+                <Link
+                  href={webData.socialLinks.youtube}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                >
+                  <Youtube size={20} />
+                </Link>
+              )}
+              {webData?.socialLinks?.twitter && (
+                <Link
+                  href={webData.socialLinks.twitter}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                >
+                  <Github size={20} />
+                </Link>
+              )}
+              {webData?.socialLinks?.linkedin && (
+                <Link
+                  href={webData.socialLinks.linkedin}
+                  className="text-600 hover:text-red-500 transition-colors"
+                >
+                  <Linkedin size={20} />
+                </Link>
+              )}
+              {webData?.socialLinks?.facebook && (
+                <Link
+                  href={webData.socialLinks.facebook}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                >
+                  <Facebook size={20} />
+                </Link>
+              )}
+              {webData?.socialLinks?.instagram && (
+                <Link
+                  href={webData.socialLinks.instagram}
+                  className="text-gray-600 hover:text-red-500 transition-colors"
+                >
+                  <Slack size={20} />
+                </Link>
+              )}
             </div>
           </div>
 
@@ -154,29 +168,18 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">Newsletter</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Subscribe to our newsletter to receive updates and exclusive
-              offers.
-            </p>
-            <form className="space-y-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-red-500"
-              />
-              <button
-                type="submit"
-                className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+            <h3 className="font-bold text-gray-900 mb-4">Contact Info</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              {webData?.contactInfo?.visitUs && <li>Visit Us: {webData.contactInfo.visitUs}</li>}
+              {webData?.contactInfo?.callUs && <li>Call Us: {webData.contactInfo.callUs}</li>}
+              {webData?.contactInfo?.emailUs && <li>Email Us: {webData.contactInfo.emailUs}</li>}
+              {webData?.contactInfo?.workingHours && <li>Working Hours: {webData.contactInfo.workingHours}</li>}
+            </ul>
           </div>
         </div>
         <div className="border-t border-gray-200 py-6 text-center text-sm text-gray-600">
           © {date.getFullYear()}{" "}
-          <span className="font-semibold">Logo</span>. All rights reserved.
+          <span className="font-semibold">{webData?.storeName || "Logo"}</span>. All rights reserved.
         </div>
       </Container>
     </footer>

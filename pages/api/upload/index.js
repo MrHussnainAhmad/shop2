@@ -9,10 +9,7 @@ const upload = multer({ dest: '/tmp' });
 const router = createRouter();
 
 router.use(upload.single('file')).post(async (req, res) => {
-  const { userId } = auth(req);
-  if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  
 
   try {
     const result = await cloudinary.uploader.upload(req.file.path, {

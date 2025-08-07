@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/sanity.types";
+import { Product } from "@/types";
 import React from "react";
 import useCartStore from "@/store";
 import { ShoppingCart } from "lucide-react";

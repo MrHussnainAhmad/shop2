@@ -68,6 +68,18 @@ const {
     )
   }
 
+  // Helper function to get safe image src
+  const getSafeImageSrc = (product: any) => {
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      const firstImage = product.images[0];
+      // Check if the image is not empty, null, or undefined
+      if (firstImage && typeof firstImage === 'string' && firstImage.trim() !== '') {
+        return firstImage;
+      }
+    }
+    return "/placeholder-product.svg"; // Always return a valid fallback
+  };
+
   // Calculate total without coupons for comparison
   const calculateSubtotalWithoutCoupons = () => {
     return items.reduce((total, item) => {
@@ -150,6 +162,28 @@ modal.alert(result.message)
     removeCouponFromItem(productId);
   };
 
+  // Component to handle image rendering safely
+  const ProductImage = ({ product, className }: { product: any, className?: string }) => {
+    const imageSrc = getSafeImageSrc(product);
+    const productName = product.name || 'Product';
+
+    return (
+      <div className={className || "w-16 h-16 relative"}>
+        <Image
+          src={imageSrc}
+          alt={productName}
+          fill
+          className="object-cover rounded-lg"
+          onError={(e) => {
+            // Fallback if the image fails to load
+            const target = e.target as HTMLImageElement;
+            target.src = "/placeholder-product.svg";
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
@@ -191,31 +225,10 @@ modal.alert(result.message)
                       {/* Mobile Layout */}
                       <div className="md:hidden">
                         <div className="flex gap-3 mb-4">
-                          <div className="w-16 h-16 relative flex-shrink-0">
-                            {item.product.images && item.product.images.length > 0 && (
-                              <>
-                                {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
-                                  <Image
-                                    src={urlFor(item.product.images[0]).url()}
-                                    alt={item.product.name || 'Product'}
-                                    fill
-                                    className="object-cover rounded-lg"
-                                  />
-                                ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
-                                  <Image
-                                    src={item.product.images[0].url}
-                                    alt={item.product.images[0].alt || item.product.name || 'Product'}
-                                    fill
-                                    className="object-cover rounded-lg"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-                                    <span className="text-gray-400 text-xs">No Image</span>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
+                          <ProductImage 
+                            product={item.product}
+                            className="w-16 h-16 relative flex-shrink-0"
+                          />
                           <div className="flex-1 min-w-0">
                             <h3 className="font-medium text-gray-900 mb-1 text-sm leading-tight break-words">{item.product.name}</h3>
                             <p className="text-xs text-gray-500 mb-2 truncate">{item.product.sku || 'N/A'}</p>
@@ -271,31 +284,7 @@ modal.alert(result.message)
                       {/* Desktop Layout */}
                       <div className="hidden md:grid md:grid-cols-12 md:gap-6 md:items-center">
                         <div className="col-span-1">
-                          <div className="w-16 h-16 relative">
-                            {item.product.images && item.product.images.length > 0 && (
-                              <>
-                                {item.product.images[0]._type === 'image' && item.product.images[0].asset ? (
-                                  <Image
-                                    src={urlFor(item.product.images[0]).url()}
-                                    alt={item.product.name || 'Product'}
-                                    fill
-                                    className="object-cover rounded-lg"
-                                  />
-                                ) : item.product.images[0]._type === 'imageUrl' && item.product.images[0].url ? (
-                                  <Image
-                                    src={item.product.images[0].url}
-                                    alt={item.product.images[0].alt || item.product.name || 'Product'}
-                                    fill
-                                    className="object-cover rounded-lg"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-                                    <span className="text-gray-400 text-xs">No Image</span>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
+                          <ProductImage product={item.product} />
                         </div>
                         <div className="col-span-4 ml-4">
                           <h3 className="font-medium text-gray-900 text-sm leading-tight">{item.product.name}</h3>
@@ -561,7 +550,7 @@ modal.alert(result.message)
                 </div>
               </div>
 
-{/* Default Delivery Address */}
+              {/* Default Delivery Address */}
               {defaultAddress ? (
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">

@@ -39,7 +39,7 @@ const shouldHideHeader = (!hideMainMenu && pathname === "/account/account") || (
             <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
               {user?.imageUrl ? (
                 <Image
-                  src={user.imageUrl}
+                  src={user.imageUrl || "/placeholder-user.svg"}
                   alt={user?.firstName || "User"}
                   fill
                   className="object-cover"

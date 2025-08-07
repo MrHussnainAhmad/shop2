@@ -47,7 +47,7 @@ const Banner = async () => {
                 <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group">
                   {item?.image ? (
                     <Image
-                      src={item.image}
+                      src={item.image || "/placeholder-banner.svg"}
                       alt={item?.name || `Banner ${index + 1}`}
                       className={`object-cover w-full h-full transition-transform duration-300 ${
                         item?.link ? 'group-hover:scale-105' : ''
@@ -57,7 +57,7 @@ const Banner = async () => {
                     />
                   ) : item?.imageUrl ? (
                     <Image
-                      src={item.imageUrl}
+                      src={item.imageUrl || "/placeholder-banner.svg"}
                       alt={item?.name || `Banner ${index + 1}`}
                       className={`object-cover w-full h-full transition-transform duration-300 ${
                         item?.link ? 'group-hover:scale-105' : ''

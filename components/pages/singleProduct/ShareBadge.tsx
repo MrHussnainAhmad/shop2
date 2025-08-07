@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/sanity.types";
+import { Product } from "@/types";
 import React from "react";
 import { FaPinterest, FaFacebook, FaTwitter } from "react-icons/fa";
 import { MdAddToPhotos } from "react-icons/md";

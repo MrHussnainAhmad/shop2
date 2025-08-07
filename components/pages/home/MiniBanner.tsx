@@ -18,7 +18,7 @@ const MiniBanner = async () => {
           <div className="relative w-full h-full min-h-[160px] rounded-md overflow-hidden bg-gray-100 group">
             {item?.image && (
               <Image
-                src={item.image}
+                src={item.image || "/placeholder-banner.svg"}
                 alt={item?.name || `Mini Banner ${index + 1}`}
                 className={`object-cover w-full h-full transition-transform duration-300 ${
                   item?.link ? 'group-hover:scale-105' : ''
@@ -27,9 +27,10 @@ const MiniBanner = async () => {
                 sizes="(max-width: 768px) 100vw, 25vw"
               />
             )}
+            {console.log("MiniBanner image src:", item.image || "/placeholder-banner.svg")}
             {item?.imageUrl && !item?.image && (
               <Image
-                src={item.imageUrl}
+                src={item.imageUrl || "/placeholder-banner.svg"}
                 alt={item?.name || `Mini Banner ${index + 1}`}
                 className={`object-cover w-full h-full transition-transform duration-300 ${
                   item?.link ? 'group-hover:scale-105' : ''
@@ -38,6 +39,7 @@ const MiniBanner = async () => {
                 sizes="(max-width: 768px) 100vw, 25vw"
               />
             )}
+            {console.log("MiniBanner imageUrl src:", item.imageUrl || "/placeholder-banner.svg")}
             {/* Overlay content */}
             {(item?.name || item?.description || item?.badge) && (
               <div className="absolute inset-0 bg-black/20 flex flex-col justify-end p-3">

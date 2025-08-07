@@ -191,7 +191,7 @@ const EditProfilePage = () => {
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
             {user.imageUrl ? (
               <Image
-                src={user.imageUrl}
+                src={user.imageUrl || "/placeholder-user.svg"}
                 alt="Profile"
                 width={96}
                 height={96}

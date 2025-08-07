@@ -1,7 +1,6 @@
 import Container from "@/components/common/Container";
 import Title from "@/components/common/Title";
-import { Category } from "@/sanity.types";
-import { urlFor } from "@/sanity/lib/image";
+import { Category } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -33,20 +32,10 @@ const HomeCategories = ({ categories }: Props) => {
         {categories.map((category) => (
           <Link key={category._id} href={`/shop/category/${category?.slug?.current}`}>
             <div className="p-3 flex flex-col items-center gap-3 border border-transparent hover:border-orange-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-custom-text">
-              {category?.image ? (
-                <div className="w-12 h-12 md:w-16 md:h-16 overflow-hidden ">
-                  <Image
-                    src={category.image}
-                    alt={category?.name || "Category"}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : category?.imageUrl ? (
+              {(category?.image || category?.imageUrl) ? (
                 <div className="w-12 h-12 md:w-16 md:h-16 overflow-hidden rounded-full">
                   <Image
-                    src={category.imageUrl}
+                    src={category.image || category.imageUrl || "/placeholder-category.svg"}
                     alt={category?.name || "Category"}
                     width={64}
                     height={64}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/sanity.types";
+import { Product } from "@/types";
 import React, { useState } from "react";
 import { Heart, Star, Truck, Shield, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

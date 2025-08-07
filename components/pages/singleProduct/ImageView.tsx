@@ -24,7 +24,7 @@ const ImageView = ({ images = [], isStock }: Props) => {
 
   // Helper function to get image URL (now directly from the array)
   const getImageUrl = (image: string) => {
-    if (!image) return '/placeholder-product.svg';
+    if (!image || image === "") return '/placeholder-product.svg';
     return image;
   };
 
@@ -75,7 +75,7 @@ const ImageView = ({ images = [], isStock }: Props) => {
                 alt={`Thumbnail ${image}`} // Changed alt to use image string
                 width={100}
                 height={100}
-                className={`w-full h-auto object-contain`}
+                className={`w-full h-full object-contain`}
               />
             </button>
           ))}

@@ -1,8 +1,11 @@
 import React from 'react';
 import Container from '@/components/common/Container';
 import { Award, Users, Globe, Heart, ShoppingBag, Truck, Shield, Star } from 'lucide-react';
+import { getWebData } from '@/lib/api';
 
-const AboutUsPage = () => {
+const AboutUsPage = async () => {
+  const webData = await getWebData();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Container className="py-12">
@@ -11,10 +14,9 @@ const AboutUsPage = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             About Our Store
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            We're passionate about bringing you the finest products with exceptional service. 
-            Our journey began with a simple mission: to make quality shopping accessible to everyone.
-          </p>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: webData?.aboutUs?.replace(/\n/g, '<br />') || "We're passionate about bringing you the finest products with exceptional service. Our journey began with a simple mission: to make quality shopping accessible to everyone." }}
+          ></p>
         </div>
 
         {/* Our Story */}
@@ -22,20 +24,9 @@ const AboutUsPage = () => {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
             <div className="space-y-4 text-gray-600">
-              <p>
-                Founded in 2020, our company started as a small family business with a big dream: 
-                to create an online shopping experience that combines quality products, competitive prices, 
-                and outstanding customer service.
-              </p>
-              <p>
-                What began as a passion project has grown into a trusted destination for thousands of 
-                customers worldwide. We've carefully curated our product selection to ensure every item 
-                meets our high standards for quality, value, and customer satisfaction.
-              </p>
-              <p>
-                Today, we continue to be driven by the same values that started our journey: 
-                integrity, quality, and putting our customers first in everything we do.
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: webData?.aboutUs?.replace(/\n/g, '<br />') || "Founded in 2020, our company started as a small family business with a big dream: to create an online shopping experience that combines quality products, competitive prices, and outstanding customer service." }}></p>
+              <p dangerouslySetInnerHTML={{ __html: webData?.aboutUs?.replace(/\n/g, '<br />') || "What began as a passion project has grown into a trusted destination for thousands of customers worldwide. We've carefully curated our product selection to ensure every item meets our high standards for quality, value, and customer satisfaction." }}></p>
+              <p dangerouslySetInnerHTML={{ __html: webData?.aboutUs?.replace(/\n/g, '<br />') || "Today, we continue to be driven by the same values that started our journey: integrity, quality, and putting our customers first in everything we do." }}></p>
             </div>
           </div>
           <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl p-8">

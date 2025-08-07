@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Input } from "../ui/input";
 import { Search, X } from "lucide-react";
-import { searchProductsClient } from "../../sanity/queries/client";
+import { searchProducts as searchProductsAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 interface SearchProduct {
@@ -43,8 +43,8 @@ const Searchbar = () => {
 
     setLoading(true);
     try {
-      const results = await searchProducts(searchTerm);
-      setProducts(results);
+      const results = await searchProductsAPI(searchTerm);
+      setProducts(results || []);
     } catch (error) {
       console.error('Search error:', error);
       setProducts([]);

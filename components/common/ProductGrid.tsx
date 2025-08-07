@@ -3,7 +3,7 @@ import { getFeaturedProducts } from "@/lib/api";
 import Container from './Container';
 import Title from './Title';
 import ProductCard from './ProductCard';
-import { FEATURED_PRODUTSResult } from '@/sanity.types';
+import { FEATURED_PRODUCTSResult } from '@/types';
 
 const ProductGrid = async () => {
   const products = await getFeaturedProducts();

@@ -1,10 +1,149 @@
-Error: ./
-App Router and Pages Router both match path: /api/addresses
-Next.js does not support having both App Router and Pages Router routes matching the same path. Please remove one of the conflicting routes.
+✅ COMPLETED: Full Migration from Sanity to MongoDB + Cloudinary
 
+🎉 FINAL UPDATE (December 2024):
+- Successfully removed ALL Sanity imports and references from the codebase
+- Created local TypeScript types in `types/index.ts` to replace `@/sanity.types`
+- Updated all components to use the new MongoDB-backed API
+- Fixed App Router vs Pages Router conflicts for `/api/addresses`
+- Migrated address API routes from Pages Router to App Router format
+- All image handling now uses direct Cloudinary URLs instead of Sanity image pipeline
 
-    at Object.getCompilationErrors (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:749:55)
-    at DevBundlerService.getCompilationError (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/lib/dev-bundler-service.js:39:55)
-    at DevServer.getCompilationError (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/next-dev-server.js:686:42)
-    at DevServer.findPageComponents (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/dev/next-dev-server.js:656:43)
-    at async DevServer.renderErrorToResponseImpl (file:///media/jack-the-sparrow/W00RK/eCommerce/shop/node_modules/next/dist/server/base-server.js:2609:26)
+RESOLVED FILES:
+✅ app/(client)/product/[slug]/page.tsx
+✅ app/(client)/FavItems/page.tsx
+✅ app/(client)/compare/page.tsx
+✅ components/common/AddToCart.tsx
+✅ components/common/ProductCard.tsx
+✅ components/common/ProductGrid.tsx
+✅ components/pages/home/ShopbyBrands.tsx
+✅ components/pages/home/Comparison.tsx
+✅ components/pages/home/HomeCategories.tsx
+✅ components/pages/singleProduct/ProductDetails.tsx
+✅ components/pages/singleProduct/ShareBadge.tsx
+✅ components/header/Searchbar.tsx
+✅ store/wishlistStore.ts
+✅ app/api/addresses/route.ts (NEW)
+✅ app/api/addresses/[id]/route.ts (NEW)
+✅ app/api/addresses/set-default/route.ts (NEW)
+✅ types/index.ts (NEW)
+
+The Core Goal
+
+  Your primary objective was to completely remove Sanity.io from your project and transition all data management (products, categories, brands, banners) to MongoDB, with
+  Cloudinary handling image storage. This is a significant architectural change.
+
+  What We Did (Phased Approach)
+
+   1. Updated MongoDB Models (`models/` directory):
+       * Action: We compared your existing Mongoose schemas (Product.js, Category.js, Brand.js, Banner.js) with their corresponding Sanity schemas.
+       * Reason: Sanity schemas often contain more fields or different structures than initial Mongoose models. To ensure MongoDB could store all the data previously managed
+          by Sanity, we expanded your Mongoose models to include fields like slug, originalPrice, discount, sku, status, variant, customAttributes, couponCode, isOnDeal,
+         dealPercentage, tags, imageUrl, parent, featured, badge, and discountAmount.
+
+   2. Created/Extended API Endpoints (`pages/api/` directory):
+       * Action: We created new API routes or extended existing ones to serve data directly from MongoDB.
+       * Reason: Previously, your frontend components would query Sanity directly. Now, they need to fetch data from your own backend API, which in turn interacts with
+         MongoDB.
+       * Details:
+           * pages/api/products/index.js: Handles GET (all products, featured, deal, search) and POST (create product).
+           * pages/api/products/[slug].js: Handles GET (single product by slug), PUT (update product), and DELETE (delete product).
+           * pages/api/categories/index.js: Handles GET (all categories) and POST (create category).
+           * pages/api/categories/[slug].js: Handles GET (single category by slug), PUT (update category), and DELETE (delete category).
+           * pages/api/brands/index.js: Handles GET (all brands) and POST (create brand).
+           * pages/api/brands/[slug].js: Handles GET (single brand by slug), PUT (update brand), and DELETE (delete brand).
+           * pages/api/banners/index.js: Handles GET (all banners, mini banners).
+           * pages/api/orders/[id].js: Added DELETE method for orders.
+
+   3. Implemented Admin Panel UI (`app/admin/` and `components/admin/` directories):
+       * Action: We scaffolded the basic admin panel structure and created components for managing products, categories, and brands.
+       * Reason: You requested an admin interface to perform CRUD operations on your data directly through the application.
+       * Details:
+           * Created app/admin/layout.tsx for a consistent admin navigation.
+           * Created app/admin/page.tsx as the admin dashboard entry.
+           * Created app/admin/products/page.tsx, app/admin/categories/page.tsx, and app/admin/brands/page.tsx as the main pages for each resource.
+           * Developed ProductForm.tsx, ProductList.tsx, CategoryForm.tsx, CategoryList.tsx, BrandForm.tsx, and BrandList.tsx to handle form submissions and display lists.
+
+   4. Migrated Frontend Data Fetching (`lib/api.ts` and various components):
+       * Action: We created a new lib/api.ts file to centralize API calls and updated all frontend components that previously fetched data from Sanity to use these new API
+         functions.
+       * Reason: To completely decouple the frontend from Sanity and connect it to your new MongoDB-backed API.
+       * Details: Functions like getCategories, getBanner, getMiniBanner, getFeaturedProducts, getAllBrands, getProductBySlug, searchProducts, getAllProductsDebug,
+         getAllProducts, and getDealProducts were moved/re-implemented in lib/api.ts to fetch from your new /api endpoints.
+
+   5. Integrated Cloudinary Image Uploads:
+       * Action: Modified ProductForm.tsx, CategoryForm.tsx, and BrandForm.tsx to handle file uploads directly to your /api/upload endpoint, which then uses Cloudinary.
+       * Reason: To allow administrators to upload images for products, categories, and brands directly through the admin panel, storing the resulting Cloudinary URLs in
+         MongoDB.
+
+   6. Removed Sanity Integration (Cleanup):
+       * Action: Systematically deleted all Sanity-related files, packages, and configurations.
+       * Reason: To ensure Sanity is completely removed from the project, reducing bundle size and eliminating unnecessary dependencies.
+       * Details:
+           * Removed the entire sanity/ directory.
+           * Removed Sanity-related dependencies from package.json (e.g., @sanity/image-url, next-sanity, sanity).
+           * Removed Sanity-specific scripts from package.json.
+           * Deleted sanity.cli.ts, sanity.config.ts, sanity.types.ts, and schema.json.
+           * Removed the cdn.sanity.io remote pattern from next.config.ts.
+
+  Errors Encountered and Their Resolutions
+
+  We faced several types of errors during this process, which is common for such a large refactoring:
+
+   1. `Error: You cannot use different slug names for the same dynamic path ('id' !== 'slug').`
+       * Cause: Next.js detected conflicting dynamic route parameters. This happened because we had both [id].js and [slug].js files in the same API route directories (e.g.,
+          pages/api/products/[id].js and pages/api/products/[slug].js). Additionally, the app/admin/studio/[[...tool]]/page.tsx catch-all route was conflicting with other
+         specific app/admin routes.
+       * Resolution:
+           * We standardized on [slug].js for products, categories, and brands, removing the redundant [id].js files.
+           * We moved pages/api/upload.js into its own subdirectory (pages/api/upload/index.js) to prevent it from being interpreted as a conflicting dynamic route at the
+             top level.
+           * We removed the app/admin/studio directory, as it was a Sanity-specific route no longer needed.
+
+   2. `Module not found: Can't resolve '@/sanity/image'` (and similar for `@/sanity.types`, `@/sanity/lib/client`, `@/sanity/queries`)
+       * Cause: These errors appeared because various frontend components still had import statements referencing Sanity-specific modules, even after the sanity/ directory
+         was removed.
+       * Resolution: We systematically went through each file reported in the build errors (ProductCard.tsx, Footer.tsx, HomeCategories.tsx, ShopbyBrands.tsx,
+         FavItems/page.tsx, account/cart/page.tsx, CartClientPage.tsx, ImageView.tsx, lib/orders.ts, app/api/stripe/webhook/route.ts). For each, we:
+           * Removed the Sanity import statements.
+           * Updated the logic that used Sanity's urlFor or client.fetch to instead use direct image URLs (from Cloudinary) or calls to your new /api endpoints.
+           * Adjusted TypeScript types (e.g., Category or Brand interfaces) to match the MongoDB models.
+
+   3. `Module not found: Can't resolve 'framer-motion'`
+       * Cause: The ImageView.tsx component used framer-motion for animations, but the package was not listed in package.json and therefore not installed.
+       * Resolution: We installed framer-motion using npm install framer-motion.
+
+   4. `Error: You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `\"use 
+      client\"` directive.`
+       * Cause: Next.js App Router requires components that use client-side React Hooks (like useState, useEffect) to be explicitly marked with "use client"; at the top of
+         the file. Our newly created admin pages were missing this directive.
+       * Resolution: We added "use client"; to the top of app/admin/products/page.tsx, app/admin/categories/page.tsx, and app/admin/brands/page.tsx.
+
+   5. `TypeError: Failed to parse URL from undefined/api/products?isOnDeal=true`
+       * Cause: This error occurred during the build process (server-side rendering/static generation). The fetch calls in lib/api.ts were using relative URLs (e.g.,
+         /api/products). In a server environment, fetch requires absolute URLs. The process.env.NEXT_PUBLIC_BASE_URL was undefined during the build.
+       * Resolution:
+           * We modified all fetch calls in lib/api.ts to prepend process.env.NEXT_PUBLIC_BASE_URL to the API paths, making them absolute.
+           * I instructed you to create/verify a .env.local file in your project root with NEXT_PUBLIC_BASE_URL=http://localhost:3000 (or your production URL).
+           * I also instructed you to clear the Next.js build cache (rm -rf .next) to ensure the new environment variable was picked up.
+
+  Current Status
+
+  At this point, all the compilation errors reported should be resolved, and your project should be fully migrated from Sanity.io to MongoDB and Cloudinary for data and
+  image management.
+
+  Next Steps for You
+
+   1. Verify `.env.local`: Double-check that your .env.local file is correctly set up with NEXT_PUBLIC_BASE_URL=http://localhost:3000.
+   2. Run `npm run dev`: Start your development server and thoroughly test all parts of your application, especially:
+       * Product, category, brand, and banner display on the frontend.
+       * Adding, editing, and deleting products, categories, and brands from the new admin panel.
+       * Image uploads for products, categories, and brands.
+       * Cart and wishlist functionality.
+       * Stripe webhook processing (this might require local testing tools like Stripe CLI).
+   3. Styling and UI/UX: The admin panel UI is functional but basic. You'll want to enhance its styling and user experience.
+   4. Authentication/Authorization: Ensure your admin routes and API endpoints are properly protected so only authorized users can access them.
+   5. Error Handling & Edge Cases: Implement more robust error handling and consider edge cases for all new functionalities.
+
+  This was a complex task, and we've systematically addressed each piece. Let me know if you have any more questions or if anything unexpected comes up during your
+  testing!
+

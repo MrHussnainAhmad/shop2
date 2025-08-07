@@ -3,7 +3,7 @@ import { getProductBySlug, getAllProductsDebug, getFeaturedProducts } from "@/li
 import Container from "@/components/common/Container";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ShareBadge from "@/components/pages/singleProduct/ShareBadge";
-import { Product } from "@/sanity.types";
+import { Product } from "@/types";
 import ImageView from "@/components/pages/singleProduct/ImageView";
 import ProductDetails from "@/components/pages/singleProduct/ProductDetails";
 

@@ -2,8 +2,11 @@ import Logo from "@/components/common/Logo";
 import { SignUp } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { getWebData } from '@/lib/api';
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const webData = await getWebData();
+
   return (
     <div className="min-h-screen bg-gradient-to-br  from-white to text-black flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -18,11 +21,8 @@ export default function SignUpPage() {
             </div>
             <div className="bg-custom-navBar p-0 text-center">
               <div className="flex items-center justify-center mb-4">
-                <Logo />
+                <Logo headerLogo={webData?.logo} />
               </div>
-              <h2 className="text-2xl text-white">Let's Create An Account!</h2>
-              <p className="text-sm text-white">
-                Your Shopping Matters...              </p>
             </div>
           </div>
           <div className="p-6">

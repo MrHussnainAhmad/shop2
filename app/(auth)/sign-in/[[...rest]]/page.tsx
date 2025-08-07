@@ -2,8 +2,11 @@ import Logo from "@/components/common/Logo";
 import { SignIn } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { getWebData } from '@/lib/api';
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const webData = await getWebData();
+
   return (
     <div className="min-h-screen bg-gradient-to-br  from-white to text-black flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -18,10 +21,8 @@ export default function SignInPage() {
             </div>
             <div className="bg-custom-navBar p-0 text-center">
               <div className="flex items-center justify-center mb-4">
-                <Logo />
+                <Logo headerLogo={webData?.logo} />
               </div>
-              <h2 className="text-2xl text-white">Welcom Back!</h2>
-              <p className="text-sm text-white">Please select the method to proceed.</p>
             </div>
           </div>
           <div className="p-6">

@@ -9,21 +9,21 @@ const router = createRouter();
 
 router
   .get(async (req, res) => {
-    const { userId } = auth(req);
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // const { userId } = auth(req);
+    // if (!userId) {
+    //   return res.status(401).json({ error: 'Unauthorized' });
+    // }
 
     await dbConnect();
     try {
-      const user = await clerkClient.users.getUser(userId);
-      if (user.privateMetadata.isAdmin) {
+      // const user = await clerkClient.users.getUser(userId);
+      // if (user.privateMetadata.isAdmin) {
         const orders = await Order.find({}).populate('user products.product');
         return res.status(200).json(orders);
-      }
-      const userProfile = await UserProfile.findOne({ clerkId: userId });
-      const orders = await Order.find({ user: userProfile._id }).populate('products.product');
-      res.status(200).json(orders);
+      // }
+      // const userProfile = await UserProfile.findOne({ clerkId: userId });
+      // const orders = await Order.find({ user: userProfile._id }).populate('products.product');
+      // res.status(200).json(orders);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
