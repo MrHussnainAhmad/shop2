@@ -1,76 +1,27 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "../../../lib/db";
-import UserProfile from "../../../models/UserProfile";
+import dbConnect from "@/lib/db";
+import UserProfile from "@/models/UserProfile";
 
 export async function GET(request: NextRequest) {
-  console.log("=== GET /api/addresses START ===");
   const { searchParams } = new URL(request.url);
-  const clerkId = searchParams.get("clerkId");
-  
-  let authResult;
-  try {
-    authResult = auth();
-    console.log("Auth result:", { userId: authResult?.userId, hasUser: !!authResult?.user });
-  } catch (error) {
-    console.error("Auth error:", error);
-    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
-  }
-  
-  const { userId, user } = authResult || {};
+  const email = searchParams.get("email");
 
-  console.log("URL clerkId parameter:", clerkId);
-  console.log("Auth userId:", userId);
-
-  if (!userId) {
-    console.log("No userId from auth");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!email) {
+    return NextResponse.json({ error: "Email is required" }, { status: 400 });
   }
 
   await dbConnect();
   try {
-    console.log("=== SEARCHING FOR USER ===");
-    console.log("Looking for user with clerkId:", userId);
-    
-    // Try to find user by clerkId first (use userId from auth, not URL param)
-    let userProfile = await UserProfile.findOne({ clerkId: userId });
-    console.log("Query result for clerkId:", userProfile ? "FOUND" : "NOT FOUND");
-    
-    // If not found by clerkId, try by email as fallback
+    const userProfile = await UserProfile.findOne({ email });
+
     if (!userProfile) {
-      const email = user?.emailAddresses?.[0]?.emailAddress;
-      if (email) {
-        console.log("User not found by clerkId, trying by email:", email);
-        userProfile = await UserProfile.findOne({ email: email });
-        console.log("Query result for email:", userProfile ? "FOUND" : "NOT FOUND");
-        
-        // If found by email, update the clerkId
-        if (userProfile && !userProfile.clerkId) {
-          console.log("Updating user with clerkId...");
-          userProfile.clerkId = userId;
-          await userProfile.save();
-          console.log("Updated user with clerkId successfully");
-        }
-      }
-    }
-    
-    if (!userProfile) {
-      console.error(`User profile not found for clerkId: ${userId}`);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    
-    console.log("Found user profile:", {
-      _id: userProfile._id,
-      email: userProfile.email,
-      clerkId: userProfile.clerkId,
-      addressesCount: userProfile.addresses?.length || 0,
-    });
-    
+
     const addresses = userProfile.addresses || [];
-    console.log("=== GET /api/addresses SUCCESS ===");
     return NextResponse.json(addresses);
   } catch (error) {
-    console.error("=== GET /api/addresses ERROR ===");
     console.error("Error fetching addresses:", error);
     return NextResponse.json(
       { error: "Failed to fetch addresses" },

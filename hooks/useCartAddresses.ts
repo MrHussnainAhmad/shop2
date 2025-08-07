@@ -39,10 +39,17 @@ export const useCartAddresses = () => {
       return;
     }
 
+    const email = user.primaryEmailAddress?.emailAddress;
+    if (!email) {
+      setAddresses([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       
-      const response = await fetch('/api/addresses', {
+      const response = await fetch(`/api/addresses?email=${encodeURIComponent(email)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
