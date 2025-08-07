@@ -59,8 +59,14 @@ const AddressesPage = () => {
         const result = await response.json();
         setAddresses(result);
       } else {
-        const errorData = await response.json();
-        console.error('Failed to fetch addresses:', errorData);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          console.error('Failed to fetch addresses:', errorData);
+        } else {
+          const errorText = await response.text();
+          console.error('Failed to fetch addresses (non-JSON response):', errorText);
+        }
       }
     } catch (error) {
       console.error("Error fetching addresses:", error);
