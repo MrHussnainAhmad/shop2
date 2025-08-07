@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getBanner } from "@/lib/api";
+import { getBanner, getMiniBanner } from "@/lib/api";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,10 +14,11 @@ import Comparison from "./Comparison";
 import MiniBanner from "./MiniBanner";
 
 const Banner = async () => {
-  const banner = await getBanner();
+  const banners = await getBanner();
+  const miniBanners = await getMiniBanner();
   
   // Handle case when no banners are available
-  if (!banner || banner.length === 0) {
+  if (!banners || banners.length === 0) {
     return (
       <Container className="mt-5 grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
         <div className="w-full lg:col-span-3">
@@ -30,7 +31,7 @@ const Banner = async () => {
             <Comparison />
           </div>
           <div className="flex-1">
-            <MiniBanner />
+            <MiniBanner miniBanners={miniBanners} />
           </div>
         </div>
       </Container>
@@ -42,7 +43,7 @@ const Banner = async () => {
       <div className="w-full lg:col-span-3">
         <Carousel className="relative w-full rounded-md overflow-hidden">
           <CarouselContent>
-            {banner.map((item, index) => {
+            {banners.map((item, index) => {
               const BannerContent = (
                 <div className="relative w-full aspect-[16/9] md:aspect-[21/9] group">
                   {item?.image ? (
@@ -125,7 +126,7 @@ const Banner = async () => {
           <Comparison />
         </div>
         <div className="flex-1">
-          <MiniBanner />
+          <MiniBanner miniBanners={miniBanners} />
         </div>
       </div>
     </Container>

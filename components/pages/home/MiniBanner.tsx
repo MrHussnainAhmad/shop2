@@ -1,11 +1,15 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getMiniBanner } from "@/lib/api";
-import { Banner } from '@/models/Banner';
+// Removed: import { getMiniBanner } from "@/lib/api";
+import { Banner as BannerType } from '@/models/Banner'; // Renamed to avoid conflict with component name
 
-const MiniBanner = async () => {
-  const miniBanners = await getMiniBanner();
+interface MiniBannerProps {
+  miniBanners: BannerType[];
+}
+
+const MiniBanner: React.FC<MiniBannerProps> = ({ miniBanners }) => {
+  // Removed: const miniBanners = await getMiniBanner();
 
   if (!miniBanners || miniBanners.length === 0) {
     return null;
@@ -13,7 +17,7 @@ const MiniBanner = async () => {
 
   return (
     <div className="flex flex-col gap-2 h-full">
-      {miniBanners.map((item: Banner, index: number) => {
+      {miniBanners.map((item: BannerType, index: number) => {
         const MiniBannerContent = (
           <div className="relative w-full h-full min-h-[160px] rounded-md overflow-hidden bg-gray-100 group">
             {item?.image && (

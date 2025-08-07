@@ -28,6 +28,11 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
               </Link>
             </li>
             <li className="mb-2">
+              <Link href="/admin/banner" className="block hover:bg-gray-700 p-2 rounded-md transition-colors duration-200">
+                Banner
+              </Link>
+            </li>
+            <li className="mb-2">
               <Link href="/admin/orders" className="block hover:bg-gray-700 p-2 rounded-md transition-colors duration-200">
                 Orders
               </Link>
