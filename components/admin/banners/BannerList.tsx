@@ -30,7 +30,7 @@ const BannerList: React.FC<BannerListProps> = ({ onEdit }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/banners');
+      const res = await fetch('/api/banners/simple');
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -56,7 +56,7 @@ const BannerList: React.FC<BannerListProps> = ({ onEdit }) => {
 
     setDeleting(id);
     try {
-      const res = await fetch(`/api/banners/${id}`, {
+      const res = await fetch(`/api/banners/simple/${id}`, {
         method: 'DELETE',
       });
 

@@ -95,7 +95,7 @@ const BannerForm: React.FC<BannerFormProps> = ({ initialData, onSuccess }) => {
       }
 
       const isEditing = !!formData._id;
-      const apiUrl = isEditing ? `/api/banners/${formData._id}` : '/api/banners';
+      const apiUrl = isEditing ? `/api/banners/simple/${formData._id}` : '/api/banners/simple';
       const httpMethod = isEditing ? 'PUT' : 'POST';
 
       const response = await axios({

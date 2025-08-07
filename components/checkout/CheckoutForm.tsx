@@ -15,6 +15,7 @@ import useCartStore from '@/store';
 import { formatPrice } from '@/lib/stripe';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAddressesByEmail } from '@/hooks/useAddressesByEmail';
 
 interface CheckoutFormProps {
   clientSecret: string;
@@ -31,6 +32,9 @@ export default function CheckoutForm({ clientSecret, paymentIntentId }: Checkout
   const [email, setEmail] = useState('');
   const [billingAddress, setBillingAddress] = useState<Record<string, any> | null>(null);
   const [shippingAddress, setShippingAddress] = useState<Record<string, any> | null>(null);
+  
+  // Use our new email-based address hook
+  const { createAddress } = useAddressesByEmail(email || null);
   
   const shippingCost = 10; // You can make this dynamic
   const totalPrice = getTotalPrice();
@@ -72,6 +76,45 @@ export default function CheckoutForm({ clientSecret, paymentIntentId }: Checkout
         toast.error(error.message || 'Payment failed. Please try again.');
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
         toast.success('Payment successful!');
+        
+        // Save addresses automatically for the user
+        try {
+          if (shippingAddress && email) {
+            console.log('Saving shipping address:', shippingAddress);
+            await createAddress({
+              name: shippingAddress.name || 'Shipping Address',
+              email: email,
+              streetAddress: shippingAddress.address?.line1 || '',
+              apartment: shippingAddress.address?.line2 || '',
+              city: shippingAddress.address?.city || '',
+              state: shippingAddress.address?.state || '',
+              postalCode: shippingAddress.address?.postal_code || '',
+              country: shippingAddress.address?.country || 'US',
+              phone: shippingAddress.phone || '',
+              isDefault: false,
+            });
+          }
+          
+          // Only save billing address if it's different from shipping
+          if (billingAddress && email && JSON.stringify(billingAddress) !== JSON.stringify(shippingAddress)) {
+            console.log('Saving billing address:', billingAddress);
+            await createAddress({
+              name: billingAddress.name || 'Billing Address',
+              email: email,
+              streetAddress: billingAddress.address?.line1 || '',
+              apartment: billingAddress.address?.line2 || '',
+              city: billingAddress.address?.city || '',
+              state: billingAddress.address?.state || '',
+              postalCode: billingAddress.address?.postal_code || '',
+              country: billingAddress.address?.country || 'US',
+              phone: billingAddress.phone || '',
+              isDefault: false,
+            });
+          }
+        } catch (addressError) {
+          console.log('Address saving failed:', addressError);
+          // Don't show error to user as payment was successful
+        }
         
         // Fallback order creation and stock reduction - especially for localhost
         try {

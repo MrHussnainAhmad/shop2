@@ -2,10 +2,10 @@
 import mongoose from 'mongoose';
 
 const UserProfileSchema = new mongoose.Schema({
-  clerkId: { type: String, required: true, unique: true, sparse: true },
+  clerkId: { type: String, required: false, unique: true, sparse: true }, // Made optional for email-based users
   firstName: { type: String },
   lastName: { type: String },
-  email: { type: String, required: true, unique: true, sparse: true },
+  email: { type: String, required: true, unique: true }, // Removed sparse for better email uniqueness
   phone: { type: String },
   addresses: [{
     name: { type: String, required: true },
