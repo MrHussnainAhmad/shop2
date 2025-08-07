@@ -1,24 +1,21 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '../../../lib/db';
-
-import UserProfile from '../../../models/UserProfile';
+import dbConnect from '../../../../lib/db';
+import UserProfile from '../../../../models/UserProfile';
 
 export async function PATCH(request: NextRequest) {
-  const { userId } = auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   await dbConnect();
   try {
-    const { addressId } = await request.json();
+    const { addressId, email } = await request.json();
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
 
     if (!addressId) {
       return NextResponse.json({ error: 'Address ID is required' }, { status: 400 });
     }
 
-    const userProfile = await UserProfile.findOne({ clerkId: userId });
+    const userProfile = await UserProfile.findOne({ email });
 
     if (!userProfile) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });

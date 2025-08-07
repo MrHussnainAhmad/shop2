@@ -95,14 +95,24 @@ const AddressesPage = () => {
   };
 
   const handleSetDefault = async (addressId: string) => {
+    if (!user) {
+      toast.error('You must be signed in to set a default address.');
+      return;
+    }
+
     try {
-      // Call the dedicated set-default API
+      const email = user.primaryEmailAddress?.emailAddress;
+      if (!email) {
+        toast.error('Could not find user email.');
+        return;
+      }
+
       const response = await fetch('/api/addresses/set-default', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ addressId }),
+        body: JSON.stringify({ addressId, email }),
       });
 
       if (!response.ok) {

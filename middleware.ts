@@ -29,7 +29,7 @@ export default clerkMiddleware({
 export const config = {
   matcher: [
     // Exclude files with a "." followed by an extension, which are typically static files.
-    "/((?!.+\\.[\\w]+$|_next).*)",
+    "/((?!.+\.[\w]+$|_next).*)",
     // Re-include any files in the api or trpc folders that might have been excluded above.
     "/(api|trpc)(.*)",
   ],
