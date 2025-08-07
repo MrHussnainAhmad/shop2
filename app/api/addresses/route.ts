@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/db";
 import UserProfile from "../../../models/UserProfile";
@@ -7,7 +7,17 @@ export async function GET(request: NextRequest) {
   console.log("=== GET /api/addresses START ===");
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get("clerkId");
-  const { userId, user } = auth();
+  
+  let authResult;
+  try {
+    authResult = auth();
+    console.log("Auth result:", { userId: authResult?.userId, hasUser: !!authResult?.user });
+  } catch (error) {
+    console.error("Auth error:", error);
+    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
+  }
+  
+  const { userId, user } = authResult || {};
 
   console.log("URL clerkId parameter:", clerkId);
   console.log("Auth userId:", userId);
@@ -77,10 +87,39 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     console.log("Database connected successfully");
 
-    // Single auth call
+    // Try both auth approaches
     console.log("Getting auth info...");
-    const { userId, user } = auth();
-    console.log("Raw auth result:", { userId, user });
+    let userId;
+    let user;
+    
+    // First try auth()
+    try {
+      const authResult = auth();
+      console.log("Auth() result:", { 
+        userId: authResult?.userId, 
+        hasUser: !!authResult?.user
+      });
+      userId = authResult?.userId;
+      user = authResult?.user;
+    } catch (error) {
+      console.error("Auth() error:", error);
+    }
+    
+    // If auth() didn't work, try currentUser()
+    if (!userId) {
+      try {
+        console.log("Trying currentUser() approach...");
+        const currentUserResult = await currentUser();
+        console.log("CurrentUser() result:", { 
+          id: currentUserResult?.id, 
+          hasEmailAddresses: !!currentUserResult?.emailAddresses?.length 
+        });
+        userId = currentUserResult?.id;
+        user = currentUserResult;
+      } catch (error) {
+        console.error("CurrentUser() error:", error);
+      }
+    }
 
     if (!userId) {
       console.log("No userId found in auth");
