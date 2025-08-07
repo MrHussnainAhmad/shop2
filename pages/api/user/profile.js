@@ -1,5 +1,5 @@
 
-import { auth } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import { createRouter } from 'next-connect';
 import dbConnect from '../../../lib/db';
 import UserProfile from '../../../models/UserProfile';
@@ -8,7 +8,7 @@ const router = createRouter();
 
 router
   .get(async (req, res) => {
-    const { userId } = auth(req);
+    const { userId } = getAuth(req);
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -25,7 +25,7 @@ router
     }
   })
   .put(async (req, res) => {
-    const { userId } = auth(req);
+    const { userId } = getAuth(req);
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
