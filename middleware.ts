@@ -4,7 +4,22 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 // for more information about configuring your middleware
 export default clerkMiddleware({
   // Add any routes that should be publicly accessible.
-  publicRoutes: [],
+  publicRoutes: [
+    "/",
+    "/shop/(.*)", 
+    "/product/(.*)",
+    "/api/banners",
+    "/api/categories/(.*)",
+    "/api/brands/(.*)", 
+    "/api/products/(.*)",
+    "/api/webhooks/(.*)",
+    "/aboutus",
+    "/contactus",
+    "/faqs",
+    "/help",
+    "/privacy",
+    "/terms"
+  ],
 });
 
 export const config = {

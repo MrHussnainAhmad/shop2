@@ -1,4 +1,5 @@
 const nextConnect = require('next-connect').default;
+import { auth } from '@clerk/nextjs/server';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../../../lib/cloudinary';
@@ -27,9 +28,17 @@ const apiRoute = nextConnect({
 apiRoute.use(upload.single('image')); // 'image' is the name of the form field
 
 apiRoute.post((req, res) => {
+  // Check authentication
+  const { userId } = auth(req);
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized - Please sign in' });
+  }
+  
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded.' });
   }
+  
+  console.log('Image uploaded successfully:', req.file.path);
   res.status(200).json({ imageUrl: req.file.path });
 });
 

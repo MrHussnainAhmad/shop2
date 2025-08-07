@@ -1,7 +1,16 @@
+import { auth } from '@clerk/nextjs/server';
 import dbConnect from '../../../lib/db';
 import Banner from '../../../models/Banner';
 
 export default async function handler(req, res) {
+  // Add authentication for POST operations
+  if (req.method === 'POST') {
+    const { userId } = auth(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized - Please sign in' });
+    }
+  }
+  
   await dbConnect();
 
   switch (req.method) {

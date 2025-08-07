@@ -4,27 +4,63 @@ import dbConnect from "../../../lib/db";
 import UserProfile from "../../../models/UserProfile";
 
 export async function GET(request: NextRequest) {
+  console.log("=== GET /api/addresses START ===");
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get("clerkId");
-  const { userId } = auth();
+  const { userId, user } = auth();
 
-  if (!clerkId) {
-    return NextResponse.json(
-      { error: "Clerk ID is required" },
-      { status: 400 }
-    );
+  console.log("URL clerkId parameter:", clerkId);
+  console.log("Auth userId:", userId);
+
+  if (!userId) {
+    console.log("No userId from auth");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   await dbConnect();
   try {
-    const userProfile = await UserProfile.findOne({ clerkId });
+    console.log("=== SEARCHING FOR USER ===");
+    console.log("Looking for user with clerkId:", userId);
+    
+    // Try to find user by clerkId first (use userId from auth, not URL param)
+    let userProfile = await UserProfile.findOne({ clerkId: userId });
+    console.log("Query result for clerkId:", userProfile ? "FOUND" : "NOT FOUND");
+    
+    // If not found by clerkId, try by email as fallback
     if (!userProfile) {
-      console.error(`User profile not found for clerkId: ${clerkId}`);
+      const email = user?.emailAddresses?.[0]?.emailAddress;
+      if (email) {
+        console.log("User not found by clerkId, trying by email:", email);
+        userProfile = await UserProfile.findOne({ email: email });
+        console.log("Query result for email:", userProfile ? "FOUND" : "NOT FOUND");
+        
+        // If found by email, update the clerkId
+        if (userProfile && !userProfile.clerkId) {
+          console.log("Updating user with clerkId...");
+          userProfile.clerkId = userId;
+          await userProfile.save();
+          console.log("Updated user with clerkId successfully");
+        }
+      }
+    }
+    
+    if (!userProfile) {
+      console.error(`User profile not found for clerkId: ${userId}`);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+    
+    console.log("Found user profile:", {
+      _id: userProfile._id,
+      email: userProfile.email,
+      clerkId: userProfile.clerkId,
+      addressesCount: userProfile.addresses?.length || 0,
+    });
+    
     const addresses = userProfile.addresses || [];
+    console.log("=== GET /api/addresses SUCCESS ===");
     return NextResponse.json(addresses);
   } catch (error) {
+    console.error("=== GET /api/addresses ERROR ===");
     console.error("Error fetching addresses:", error);
     return NextResponse.json(
       { error: "Failed to fetch addresses" },

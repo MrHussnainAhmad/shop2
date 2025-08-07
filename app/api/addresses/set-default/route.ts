@@ -12,13 +12,13 @@ export async function PATCH(request: NextRequest) {
 
   await dbConnect();
   try {
-    const { addressId, email } = await request.json();
+    const { addressId } = await request.json();
 
-    if (!addressId || !email) {
-      return NextResponse.json({ error: 'Address ID and email are required' }, { status: 400 });
+    if (!addressId) {
+      return NextResponse.json({ error: 'Address ID is required' }, { status: 400 });
     }
 
-    const userProfile = await UserProfile.findOne({ email });
+    const userProfile = await UserProfile.findOne({ clerkId: userId });
 
     if (!userProfile) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });

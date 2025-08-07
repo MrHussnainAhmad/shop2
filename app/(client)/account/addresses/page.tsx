@@ -144,8 +144,7 @@ const AddressesPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          addressId,
-          clerkId: user?.id 
+          addressId
         }),
         credentials: 'include',
       });

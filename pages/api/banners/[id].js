@@ -1,8 +1,17 @@
+import { auth } from '@clerk/nextjs/server';
 import dbConnect from '../../../lib/db';
 import Banner from '../../../models/Banner';
 
 export default async function handler(req, res) {
   const { query: { id }, method } = req;
+  
+  // Add authentication for PUT and DELETE operations
+  if (method === 'PUT' || method === 'DELETE') {
+    const { userId } = auth(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized - Please sign in' });
+    }
+  }
 
   await dbConnect();
 
