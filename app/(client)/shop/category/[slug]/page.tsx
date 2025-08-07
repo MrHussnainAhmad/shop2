@@ -44,7 +44,7 @@ const CategoryPage = async ({ params }: CategoryPageProps) => {
   
   try {
     const [products, categories, brands] = await Promise.all([
-      getAllProducts(),
+      getProductsByCategory(slug),
       getCategories(),
       getAllBrands(),
     ]);

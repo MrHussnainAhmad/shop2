@@ -9,7 +9,7 @@ const router = createRouter();
 router.get(async (req, res) => {
   await dbConnect();
   try {
-    const { searchTerm, isFeatured, isOnDeal, debug } = req.query;
+    const { searchTerm, isFeatured, isOnDeal, debug, category } = req.query;
     let query = {};
 
     if (searchTerm) {
@@ -27,6 +27,15 @@ router.get(async (req, res) => {
 
     if (isOnDeal === 'true') {
       query = { ...query, isOnDeal: true };
+    }
+
+    if (category) {
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) {
+        query = { ...query, category: categoryDoc._id };
+      } else {
+        return res.status(404).json({ error: 'Category not found' });
+      }
     }
 
     const products = await Product.find(query).populate('category').populate('brand');

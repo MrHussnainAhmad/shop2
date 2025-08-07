@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../lib/db';
-import Address from '../../../models/Address';
+
 import UserProfile from '../../../models/UserProfile';
 
 export async function PATCH(request: NextRequest) {
@@ -25,20 +25,20 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Set all addresses for this user to not default
-    await Address.updateMany({ user: userProfile._id }, { isDefault: false });
+    userProfile.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
 
     // Set the specified address as default
-    const updatedAddress = await Address.findByIdAndUpdate(
-      addressId,
-      { isDefault: true },
-      { new: true }
-    );
-
-    if (!updatedAddress) {
+    const defaultAddress = userProfile.addresses.id(addressId);
+    if (!defaultAddress) {
       return NextResponse.json({ error: 'Address not found' }, { status: 404 });
     }
+    defaultAddress.isDefault = true;
 
-    return NextResponse.json(updatedAddress);
+    await userProfile.save();
+
+    return NextResponse.json(defaultAddress);
   } catch (error) {
     console.error('Error setting default address:', error);
     return NextResponse.json({ error: 'Failed to set default address' }, { status: 500 });

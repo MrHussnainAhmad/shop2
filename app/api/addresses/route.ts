@@ -1,64 +1,214 @@
-import { auth } from '@clerk/nextjs/server';
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '../../../lib/db';
-import Address from '../../../models/Address';
-import UserProfile from '../../../models/UserProfile';
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "../../../lib/db";
+import UserProfile from "../../../models/UserProfile";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const email = searchParams.get('email');
+  const clerkId = searchParams.get("clerkId");
+  const { userId } = auth();
 
-  if (!email) {
-    return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+  if (!clerkId) {
+    return NextResponse.json(
+      { error: "Clerk ID is required" },
+      { status: 400 }
+    );
   }
 
   await dbConnect();
   try {
-    const userProfile = await UserProfile.findOne({ email });
+    const userProfile = await UserProfile.findOne({ clerkId });
     if (!userProfile) {
-      console.error(`User profile not found for email: ${email}`);
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.error(`User profile not found for clerkId: ${clerkId}`);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    const addresses = await Address.find({ user: userProfile._id });
+    const addresses = userProfile.addresses || [];
     return NextResponse.json(addresses);
   } catch (error) {
-    console.error('Error fetching addresses:', error);
-    return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 });
+    console.error("Error fetching addresses:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch addresses" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  console.log("=== POST /api/addresses START ===");
 
-  await dbConnect();
   try {
-    const body = await request.json();
-    const { user } = auth();
-    const email = user?.emailAddresses?.[0]?.emailAddress;
+    console.log("Connecting to database...");
+    await dbConnect();
+    console.log("Database connected successfully");
 
-    if (!email) {
-      return NextResponse.json({ error: 'User email not found' }, { status: 400 });
+    // Single auth call
+    console.log("Getting auth info...");
+    const { userId, user } = auth();
+    console.log("Raw auth result:", { userId, user });
+
+    if (!userId) {
+      console.log("No userId found in auth");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let userProfile = await UserProfile.findOne({ clerkId: userId });
+    console.log("Auth userId:", userId);
+    console.log("Auth user email addresses:", user?.emailAddresses);
+    console.log("Auth user firstName:", user?.firstName);
+    console.log("Auth user lastName:", user?.lastName);
 
-    if (!userProfile) {
-      userProfile = await UserProfile.create({
-        clerkId: userId,
-        email: email,
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
+    console.log("Parsing request body...");
+    const body = await request.json();
+    console.log("Request body:", JSON.stringify(body, null, 2));
+
+    const email = user?.emailAddresses?.[0]?.emailAddress;
+    console.log("Extracted email:", email);
+
+    if (!email) {
+      console.error("User email not found in auth");
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      );
+    }
+
+    console.log("=== SEARCHING FOR USER ===");
+    console.log("Looking for user with clerkId:", userId);
+
+    // Try to find user by clerkId first
+    let userProfile = await UserProfile.findOne({ clerkId: userId });
+    console.log(
+      "Query result for clerkId:",
+      userProfile ? "FOUND" : "NOT FOUND"
+    );
+
+    if (userProfile) {
+      console.log("Found user by clerkId:", {
+        _id: userProfile._id,
+        email: userProfile.email,
+        clerkId: userProfile.clerkId,
+        addressesCount: userProfile.addresses?.length || 0,
       });
     }
 
-    const address = await Address.create({ ...body, user: userProfile._id });
-    userProfile.addresses.push(address._id);
-    await userProfile.save();
-    return NextResponse.json(address, { status: 201 });
+    // If not found by clerkId, try by email (your suggested fallback)
+    if (!userProfile) {
+      console.log("User not found by clerkId, trying by email:", email);
+      userProfile = await UserProfile.findOne({ email: email });
+      console.log(
+        "Query result for email:",
+        userProfile ? "FOUND" : "NOT FOUND"
+      );
+
+      if (userProfile) {
+        console.log("Found user by email:", {
+          _id: userProfile._id,
+          email: userProfile.email,
+          clerkId: userProfile.clerkId,
+          addressesCount: userProfile.addresses?.length || 0,
+        });
+
+        // If found by email, update the clerkId
+        if (!userProfile.clerkId) {
+          console.log("Updating user with clerkId...");
+          userProfile.clerkId = userId;
+          const updatedUser = await userProfile.save();
+          console.log("Updated user with clerkId successfully");
+        }
+      }
+    }
+
+    // Create new user if still not found
+    if (!userProfile) {
+      console.log("=== CREATING NEW USER ===");
+      const newUserData = {
+        clerkId: userId,
+        email: email,
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        addresses: [], // Initialize empty addresses array
+      };
+      console.log("Creating user with data:", newUserData);
+
+      userProfile = await UserProfile.create(newUserData);
+      console.log("Created new userProfile:", {
+        _id: userProfile._id,
+        email: userProfile.email,
+        clerkId: userProfile.clerkId,
+      });
+    }
+
+    console.log("=== ADDING ADDRESS ===");
+    console.log("Current user before adding address:", {
+      _id: userProfile._id,
+      email: userProfile.email,
+      clerkId: userProfile.clerkId,
+      addressesCount: userProfile.addresses?.length || 0,
+    });
+
+    // Prepare the new address
+    const newAddress = { ...body };
+    delete newAddress._id; // Ensure Mongoose generates a new _id for subdocument
+    console.log("New address to add:", JSON.stringify(newAddress, null, 2));
+
+    // Initialize addresses array if it doesn't exist
+    if (!userProfile.addresses) {
+      console.log("Initializing addresses array");
+      userProfile.addresses = [];
+    }
+
+    console.log("Addresses count before push:", userProfile.addresses.length);
+
+    // Add the new address
+    userProfile.addresses.push(newAddress);
+    console.log("Addresses count after push:", userProfile.addresses.length);
+    console.log(
+      "Address added to array:",
+      JSON.stringify(
+        userProfile.addresses[userProfile.addresses.length - 1],
+        null,
+        2
+      )
+    );
+
+    // Save the user profile
+    console.log("Saving user profile...");
+    const savedProfile = await userProfile.save();
+    console.log("User profile saved successfully");
+    console.log("Final addresses count:", savedProfile.addresses.length);
+
+    // Return the newly created address with its generated _id
+    const createdAddress =
+      savedProfile.addresses[savedProfile.addresses.length - 1];
+    console.log(
+      "Created address to return:",
+      JSON.stringify(createdAddress, null, 2)
+    );
+
+    console.log("=== POST /api/addresses SUCCESS ===");
+    return NextResponse.json(createdAddress, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create address' }, { status: 500 });
+    console.error("=== POST /api/addresses ERROR ===");
+    console.error("Error type:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+
+    // If it's a validation error, log validation details
+    if (error.name === "ValidationError") {
+      console.error("Validation errors:", error.errors);
+    }
+
+    // If it's a MongoDB error, log more details
+    if (error.code) {
+      console.error("MongoDB error code:", error.code);
+    }
+
+    return NextResponse.json(
+      {
+        error: "Failed to create address",
+        details: error.message,
+        type: error.name,
+      },
+      { status: 500 }
+    );
   }
 }

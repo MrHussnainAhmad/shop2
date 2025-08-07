@@ -47,14 +47,14 @@ const AddressesPage = () => {
 
   const fetchAddresses = async () => {
     try {
-      const userEmail = user?.emailAddresses?.[0]?.emailAddress;
-      if (!userEmail) {
-        console.error('No user email found');
+      const clerkUserId = user?.id;
+      if (!clerkUserId) {
+        console.error('No Clerk user ID found');
         setLoading(false);
         return;
       }
       
-      const response = await fetch(`/api/addresses?email=${userEmail}`);
+      const response = await fetch(`/api/addresses?clerkId=${clerkUserId}`);
       if (response.ok) {
         const result = await response.json();
         setAddresses(result);
@@ -96,6 +96,7 @@ const AddressesPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(addressData),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -120,6 +121,7 @@ const AddressesPage = () => {
       try {
         const response = await fetch(`/api/addresses/${addressId}`, {
           method: 'DELETE',
+          credentials: 'include',
         });
 
         if (!response.ok) {
@@ -143,8 +145,9 @@ const AddressesPage = () => {
         },
         body: JSON.stringify({ 
           addressId,
-          email: user?.emailAddresses?.[0]?.emailAddress 
+          clerkId: user?.id 
         }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

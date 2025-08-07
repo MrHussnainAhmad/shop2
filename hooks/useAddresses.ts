@@ -27,9 +27,9 @@ export const useAddresses = () => {
       setLoading(true);
       setError(null);
       
-      const userEmail = user?.emailAddresses?.[0]?.emailAddress;
-      if (!userEmail) {
-        console.error('No user email found');
+      const clerkUserId = user?.id;
+      if (!clerkUserId) {
+        console.error('No Clerk user ID found');
         setLoading(false);
         return;
       }
@@ -38,7 +38,7 @@ export const useAddresses = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetch(`/api/addresses?email=${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`/api/addresses?clerkId=${clerkUserId}`, {
         signal: controller.signal
       });
       

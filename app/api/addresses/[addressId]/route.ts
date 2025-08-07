@@ -1,13 +1,24 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/db';
-import Address from '../../../../models/Address';
+import UserProfile from '../../../../models/UserProfile';
+
 
 export async function GET(request: NextRequest, { params }: { params: { addressId: string } }) {
+  const { userId } = auth();
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { addressId } = params;
   await dbConnect();
   try {
-    const address = await Address.findById(addressId);
+    const userProfile = await UserProfile.findOne({ clerkId: userId });
+    if (!userProfile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    }
+
+    const address = userProfile.addresses.id(addressId);
     if (!address) {
       return NextResponse.json({ error: 'Address not found' }, { status: 404 });
     }
@@ -28,11 +39,21 @@ export async function PUT(request: NextRequest, { params }: { params: { addressI
   await dbConnect();
   try {
     const body = await request.json();
-    const updatedAddress = await Address.findByIdAndUpdate(addressId, body, { new: true });
-    if (!updatedAddress) {
+    const userProfile = await UserProfile.findOne({ clerkId: userId });
+    if (!userProfile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    }
+
+    const address = userProfile.addresses.id(addressId);
+    if (!address) {
       return NextResponse.json({ error: 'Address not found' }, { status: 404 });
     }
-    return NextResponse.json(updatedAddress);
+
+    // Update the address fields
+    Object.assign(address, body);
+
+    await userProfile.save();
+    return NextResponse.json(address);
   } catch (error) {
     console.error('Error updating address:', error);
     return NextResponse.json({ error: 'Failed to update address' }, { status: 500 });
@@ -48,10 +69,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { addre
   const { addressId } = params;
   await dbConnect();
   try {
-    const deletedAddress = await Address.findByIdAndDelete(addressId);
-    if (!deletedAddress) {
-      return NextResponse.json({ error: 'Address not found' }, { status: 404 });
+    const userProfile = await UserProfile.findOne({ clerkId: userId });
+    if (!userProfile) {
+      return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
+
+    userProfile.addresses.id(addressId).deleteOne();
+    await userProfile.save();
+
     return NextResponse.json({ message: 'Address deleted successfully' });
   } catch (error) {
     console.error('Error deleting address:', error);
