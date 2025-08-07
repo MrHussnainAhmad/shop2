@@ -28,9 +28,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = auth();
+  const { userId, user } = auth();
+  console.log("API POST /api/addresses: userId", userId);
+  console.log("API POST /api/addresses: user", user);
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized - No userId' }, { status: 401 });
   }
 
   await dbConnect();
